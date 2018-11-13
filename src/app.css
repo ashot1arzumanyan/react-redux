@@ -1,0 +1,208 @@
+html {
+    height: 100%;
+}
+
+body {
+    min-height: 100%;
+}
+
+#root {
+    min-height: 100%;
+}
+
+.light {
+    background-color: var(--body-color-light)
+}
+
+ul {
+    list-style: none;
+}
+
+a {
+    cursor: pointer;
+}
+
+textarea {
+    border-width: 2px;
+}
+/* 
+label.jumper {
+    position: absolute;
+    padding: 6px 10px;
+    cursor: text;
+} */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: darkgray;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.jumperLabel {
+    margin-top: 2rem;
+}
+
+.jumperLabel label {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 100%;
+    /* opacity: .7; */
+    z-index: 99;
+}
+
+.jump label {
+    opacity: .7;
+    transform: translate(-13.2%, -25px) scale(0.75);
+    transition: transform 0.2s
+}
+
+.jumpCancel label {
+    transform: translate(0, 0) scale(1);
+    transition: transform 0.2s
+}
+
+.close {
+    position: absolute;
+    right: 7px;
+}
+
+.nav {
+    position: relative;
+}
+
+.light-dark {
+    position: absolute;
+    right: 111px;
+    font-size: .75rem;
+    bottom: 0;
+}
+
+.light-dark .nav-link {
+    padding: .6rem;
+}
+
+ul.select {
+    position: absolute;
+    z-index: 9999;
+    overflow: auto;
+    max-height: 500px;
+    width: 100%
+}
+
+.Filter li {
+    cursor: pointer;
+}
+
+.Filter li:hover {
+    
+}
+
+.Filter .col {
+    min-width: 250px;
+    padding: 0;
+    margin: 0 15px;
+}
+
+.Filter .row {
+    flex-wrap: nowrap;
+}
+
+.vertical_divider {
+    width: 1px;
+    height: 64%;
+}
+
+.Proposal hr {
+    border-top-color: var(--green);
+    opacity: .6;
+}
+
+.Proposal .vertical_divider {
+    background-color: var(--green);
+    opacity: .6;
+}
+
+.Demand hr {
+    border-top-color: var(--danger);
+    opacity: .6;
+}
+
+.Demand .vertical_divider {
+    background-color: var(--danger);
+    opacity: .6;
+}
+
+.light .nav-link.green {
+    color: var(--green)
+}
+
+.light .nav-link.green:hover, .light .nav-link.green:focus {
+    border-bottom-color: var(--green)
+}
+
+.light .nav-link.red {
+    color: var(--danger)
+}
+
+.light .nav-link.red:hover, .light .nav-link.red:focus  {
+    border-bottom-color: var(--danger)
+}
+
+.dark {
+    background-color: var(--body-color-dark);
+    color: darkgray;
+}
+
+.dark .nav-link {
+    color: darkgray;
+    border-top: 3px solid var(--body-color-dark);
+    border-bottom: 3px solid var(--body-color-dark);
+}
+
+.dark .nav-link:hover, .dark .nav-link:focus {
+    border-top-color:  darkgray;
+}
+
+.dark .nav-link.green {
+    color: var(--green)
+}
+
+.dark .nav-link.green:hover, .dark .nav-link.green:focus {
+    border-top-color: var(--green)
+}
+
+.dark .nav-link.red {
+    color: var(--danger)
+}
+
+.dark .nav-link.red:hover, .dark .nav-link.red:focus  {
+    border-top-color: var(--danger)
+}
+
+.dark .nav {
+    background-color: var(--body-color-dark)
+}
+
+.dark .card {
+    background-color: #404040;
+}
+
+.dark .form-control {
+    color: darkgray;
+    background-color: var(--body-color-dark);
+}
+
+.dark .form-control:focus {
+    background-color: var(--body-color-dark);
+}
+
+.dark .Filter li {
+    background-color: #404040;
+    color: darkgray
+}
+
+.dark .nav {
+    border-bottom: 3px solid darkgray;
+}
