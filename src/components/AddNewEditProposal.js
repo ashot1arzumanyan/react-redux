@@ -152,7 +152,6 @@ class AddNewEditProposal extends Component {
       ]
 
       function checkAndAddToNameValues(name, value) {
-        console.log(name, value);
         if (value) {
           nameValues.push( { name: name, value: value } )
         }

@@ -51,6 +51,7 @@ class EditDelete extends Component {
             <img 
               src={require('./images/edit.svg')} 
               height='24'
+              alt='Edit'
             />
           </a>
         </div>
@@ -63,6 +64,7 @@ class EditDelete extends Component {
             <img 
               src={require('./images/delete.svg')} 
               height='24'
+              alt='Delete'
             />
           </a>
           <Modal isOpen={this.state.modal} toggle={this.toggle}>

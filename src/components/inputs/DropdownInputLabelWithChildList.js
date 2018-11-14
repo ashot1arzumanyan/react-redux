@@ -9,8 +9,6 @@ class DropdownInputLabelWithChildList extends Component {
 
   constructor(props) {
     super(props)
-    this.datasetEn = null,
-    this.value = '',
     this.list = []
     this.childList = []
     this.state = {
@@ -88,7 +86,6 @@ class DropdownInputLabelWithChildList extends Component {
   render() {
     
     const { common, cFF, name, type, listName, childName, childListName, onInput, onBlur, onFocus, onClick, isBlurred, isInvalidMsg } = this.props
-    const { datasetEn, value } = this.state
 
     return (
       <Fragment>
@@ -98,14 +95,12 @@ class DropdownInputLabelWithChildList extends Component {
             id={name}
             type={type} 
             name={name}
-            data-en={datasetEn}
             onFocus={onFocus}
             onInput={(e) => {
               onInput(e)
               this.onInputFilterOwnAndChildLists(e)
             }}
             onBlur={onBlur}
-            value={value}
           />
           <ListGroup className='d-none select'>
             {this.state.list.map(listItem => 

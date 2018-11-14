@@ -8,11 +8,41 @@ class ContinuousMiddleDeamndItem extends Component {
 
     const { common, continuousType, frequencyNum, quantity } = this.props
     const ct = common[continuousType].toLowerCase();
+    const lang = localStorage.lang;
     const Small = () => {
-      if (frequencyNum === '1') {
-        return <small>{ `Ամեն ${ct}` }</small>
+      const getText = () => {
+        if (frequencyNum === '1') {
+          if (lang === 'ru') {
+            if (continuousType === 'week') {
+              return 'Каждую неделю'
+            } else {
+              return `Каждый ${ct}`
+            }
+          } else if (lang === 'en') {
+            return `Every ${ct}`
+          } else {
+            return `Ամեն ${ct}`;
+          }
+        } else {
+          if (lang === 'ru') {
+            if (continuousType === 'day') {
+              return `Каждые ${frequencyNum} дня`
+            } else if (continuousType === 'week') {
+              return `Каждые ${frequencyNum} недели`
+            } else {
+              return `Каждые ${frequencyNum} месяца`
+            }
+          } else if (lang === 'en') {
+            return `Every ${frequencyNum} ${ct}s`
+          } else {
+            return `Ամեն ${frequencyNum} ${ct}ը մեկ`;
+          }
+        }
       }
-      return <small>{ `Ամեն ${frequencyNum} ${ct}ը մեկ` }</small>
+
+      const text = getText()
+
+      return<small>{ text }</small>
     }
     return (
       <div className='d-flex flex-column justify-content-between align-items-center'>
