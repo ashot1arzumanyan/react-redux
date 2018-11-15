@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { connect } from 'react-redux'
 
 import getDemandsAction from '../../actions/getDemandsAction'
@@ -21,7 +21,7 @@ class Demand extends Component {
       )
     }
     return(
-      <div className='col-6'>
+      <Fragment>
         {demands.map((demand, i) => 
           <div 
             className='Demand mb-5'
@@ -31,7 +31,7 @@ class Demand extends Component {
             />
           </div>
         )}
-      </div>
+      </Fragment>
     )
   }
 }

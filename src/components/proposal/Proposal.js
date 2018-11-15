@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { connect } from 'react-redux'
 
 import getProposalsAction from '../../actions/getProposalsAction'
@@ -21,7 +21,7 @@ class Proposal extends Component {
       )
     }
     return (
-      <div className='col-6'>
+      <Fragment>
         {proposals.map((proposal, i) => 
           <div 
             className='Proposal mb-5'
@@ -31,7 +31,7 @@ class Proposal extends Component {
             />
           </div>
         )}
-      </div>
+      </Fragment>
     )
   }
 }

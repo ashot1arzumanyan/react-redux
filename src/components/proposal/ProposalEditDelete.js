@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { connect } from 'react-redux'
 
 import EditDelete from '../proposalDemandCommon/EditDelete'
@@ -42,7 +42,7 @@ class MyStatements extends Component {
     const { proposalsById } = this.props
     
     return (
-      <div className='col-6'>
+      <Fragment>
         { proposalsById.map((proposal, i) =>
           <div 
             className='position-relative Proposal mb-5 mt-3'
@@ -57,7 +57,7 @@ class MyStatements extends Component {
             />
           </div>
         )}         
-      </div>
+      </Fragment>
     )
   }
 }

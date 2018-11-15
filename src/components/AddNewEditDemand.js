@@ -368,7 +368,7 @@ class AddNewEditDemand extends Component {
           isInvalidMsg={isInvalidMsg}
         />
         <div className="mt-4 d-flex justify-content-around">
-          <div className='w-100'>
+          <div className='w-50'>
             <Col className="mx-auto my-4">
               <InputLabel
                 name='price' 
@@ -468,8 +468,8 @@ class AddNewEditDemand extends Component {
               </Button>
             </Col>
           </div>
-          <div className='col-6'>
-            <div className='Demand mb-5'>
+          <div className='position-relative w-50'>
+            <div className='Demand proposal_demand_container position-fixed'>
               <DemandItem 
                 demand={demand} 
               />

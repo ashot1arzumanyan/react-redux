@@ -11,12 +11,16 @@ class MyStatements extends Component {
 
     return (
       <div className="mt-4 d-flex justify-content-around">
-        <ProposalEditDelete 
-          history={history}
-        />
-        <DemandEditDelete 
-          history={history}
-        />
+        <div className='proposal_demand_container'>
+          <ProposalEditDelete 
+            history={history}
+          /> 
+        </div>
+        <div className='proposal_demand_container'>
+          <DemandEditDelete 
+            history={history}
+          />
+        </div>
       </div>
     )
   }

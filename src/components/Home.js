@@ -17,9 +17,13 @@ class Home extends Component {
     return(
       <div >
         <Filter filterBy={true} />
-        <div className="mt-4 d-flex justify-content-around">
-          <Proposal />          
-          <Demand />          
+        <div className="mt-4 d-flex w-100">
+          <div className='proposal_demand_container'>
+            <Proposal />          
+          </div>
+          <div className='proposal_demand_container'>
+            <Demand />          
+          </div>
         </div>
       </div>
     )

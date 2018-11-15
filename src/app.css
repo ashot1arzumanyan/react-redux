@@ -206,3 +206,8 @@ ul.select {
 .dark .nav {
     border-bottom: 3px solid darkgray;
 }
+
+.proposal_demand_container {
+    width: 50%;
+    padding: 0 15px
+}

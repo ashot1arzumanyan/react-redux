@@ -398,14 +398,14 @@ class AddNewEditProposal extends Component {
           isInvalidMsg={isInvalidMsg}
         />
         <div className="mt-4 d-flex justify-content-around">
-          <div className='col-6'>
-            <div className='Proposal mb-5'>
+          <div className='position-relative w-50'>
+            <div className='Proposal proposal_demand_container position-fixed'>
               <ProposalItem 
                 proposal={proposal}
-              />
+              />              
             </div>
           </div>
-          <div className='w-100'>
+          <div className='w-50'>
             <Col className="mx-auto my-4">
               <InputLabel
                 name='price' 
