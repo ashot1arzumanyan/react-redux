@@ -4,15 +4,37 @@ import { Card, CardBody } from 'reactstrap'
 import FooterProposalDemandItem from '../proposalDemandCommon/FooterProposalDemandItem'
 import HeaderProposalDemandItem from '../proposalDemandCommon/HeaderProposalDemandItem'
 import MiddleDemandItem from './MiddleDemandItem'
+import Contacts from '../proposalDemandCommon/Contacts'
 
 class DemandItem extends Component {
 
+  constructor(props) {
+    super(props)
+    this.state = {
+      isContactsOpen: false
+    }
+
+    this.handleMouseOver = this.handleMouseOver.bind(this)
+    this.handleMouseLeave = this.handleMouseLeave.bind(this)
+  }
+
+  handleMouseOver() {
+    this.setState({ isContactsOpen: true })
+  }
+
+  handleMouseLeave() {
+    this.setState({ isContactsOpen: false })
+  }
+
   render() {
 
-    const { subType, price, unit, comment, date, ...restDemand } = this.props.demand
+    const { subType, price, unit, email, phone, yourName, comment, date, ...restDemand } = this.props.demand
 
     return(
-      <Card className='shadow'>
+      <Card 
+        className='shadow'
+        onMouseEnter={this.handleMouseOver}
+        onMouseLeave={this.handleMouseLeave}>
         <CardBody>
           <HeaderProposalDemandItem 
             subType={subType}
@@ -20,9 +42,17 @@ class DemandItem extends Component {
             price={price}
           />
           <hr></hr>
-          <MiddleDemandItem 
+          {this.state.isContactsOpen ? (
+            <Contacts 
+              email={email}
+              phone={phone}
+              yourName={yourName}
+            />
+          ) : (
+            <MiddleDemandItem 
             demand={restDemand}
           />
+          )}
           <hr></hr>
           <FooterProposalDemandItem
             comment={comment}

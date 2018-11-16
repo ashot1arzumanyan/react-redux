@@ -24,6 +24,7 @@ class AddNewEditDemand extends Component {
       price: '',
       unit: '',
       quantity: '',
+      yourName: '',
       email: '',
       phone: '',
       comment: '',
@@ -44,6 +45,7 @@ class AddNewEditDemand extends Component {
         price: false,
         unit: false,
         quantity: false,
+        yourName: false,
         email: false,
         phone: false,
         comment: false,
@@ -54,6 +56,7 @@ class AddNewEditDemand extends Component {
         price: '',
         unit: '',
         quantity: '',
+        yourName: '',
         email: '',
         phone: '',
         comment: '',
@@ -447,6 +450,11 @@ class AddNewEditDemand extends Component {
                 />
               </FormGroup>
               <InputLabel
+                name='yourName' 
+                type='text'
+                commonProps={commonPropsForInput}
+              />
+              <InputLabel
                 name='email' 
                 type='text'
                 commonProps={commonPropsForInput}
@@ -538,6 +546,10 @@ class AddNewEditDemand extends Component {
   
         case 'quantity':
           isInvalidMsg[name] = this.checkQuantity(value);
+          break;
+
+        case 'yourName':
+          isInvalidMsg[name] = this.checkYourName(value);
           break;
   
         case 'email':
@@ -639,6 +651,14 @@ class AddNewEditDemand extends Component {
     let msg = '';
     if (value === '') {
       msg = 'Available quantity should not be empty'
+    }
+    return msg;
+  }
+
+  checkYourName(value) {
+    let msg = '';
+    if (value === '') {
+      msg = 'Your Name field should not be empty'
     }
     return msg;
   }

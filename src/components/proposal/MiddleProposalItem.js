@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 
 import CityMiddleProposalDeamndItem from '../proposalDemandCommon/CityMiddleProposalDeamndItem'
 import VerticalDivider from '../proposalDemandCommon/VerticalDivider'
@@ -9,7 +10,16 @@ class MiddleProposalItem extends Component {
 
   render() {
 
-    const { proposal, proposal: { is_plan_to_have, oneTime, continuous, plan_to_have_quantity, plan_to_have_price } } = this.props
+    const { 
+      common,
+      proposal, 
+      proposal: { 
+        is_plan_to_have, 
+        oneTime, continuous, 
+        plan_to_have_quantity, 
+        plan_to_have_price 
+      } 
+    } = this.props
 
     const PlanToHaveSection = () => {
       if (is_plan_to_have) {
@@ -48,7 +58,7 @@ class MiddleProposalItem extends Component {
         <VerticalDivider />
         <div className='d-flex flex-column justify-content-between align-items-center'>
           <span>{proposal.available_quantity}</span>
-          <small className='text-muted'>arka qanak</small>
+          <small className='text-muted'>{common.available_quantity}</small>
         </div>
         <PlanToHaveSection />
       </div>
@@ -56,4 +66,10 @@ class MiddleProposalItem extends Component {
   }
 }
 
-export default MiddleProposalItem
+const mapStateToProps = (state) => {
+  return{
+    common: state.content.common
+  }
+}
+
+export default connect(mapStateToProps)(MiddleProposalItem)

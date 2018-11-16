@@ -25,6 +25,7 @@ const initialState = {
         username: "",
         password: "",
         repeat_password: "",
+        yourName: "",
         units: {
             kg: "",
             hat: "",
@@ -108,7 +109,6 @@ const initialState = {
             banjarexen: "",
             mirg: "",
             hataptux: "",
-            ynkuzexen: "",
             chir_ev_charaz: "",
             pahaconer: "",
             kanachexen: "",

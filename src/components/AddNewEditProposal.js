@@ -28,6 +28,7 @@ class AddNewEditProposal extends Component {
       price: '',
       unit: '',
       available_quantity: '',
+      yourName: '',
       phone: '',
       comment: '',
       plan_to_have_quantity: '',
@@ -48,6 +49,7 @@ class AddNewEditProposal extends Component {
         price: false,
         unit: false,
         available_quantity: false,
+        yourName: false,
         email: false,
         phone: false,
         comment: false,
@@ -58,6 +60,7 @@ class AddNewEditProposal extends Component {
         price: '',
         unit: '',
         available_quantity: '',
+        yourName: '',
         email: '',
         phone: '',
         comment: '',
@@ -494,6 +497,11 @@ class AddNewEditProposal extends Component {
                 </FormGroup>
               </Collapse>
               <InputLabel
+                name='yourName' 
+                type='text'
+                commonProps={commonPropsForInput}
+              />
+              <InputLabel
                 name='email' 
                 type='text'
                 commonProps={commonPropsForInput}
@@ -583,6 +591,10 @@ class AddNewEditProposal extends Component {
           isInvalidMsg[name] = this.checkAvailableQuantity(value);
           break;
 
+        case 'yourName':
+          isInvalidMsg[name] = this.checkYourName(value);
+          break;
+  
         case 'email':
           const phone = document.querySelector('input[name="phone"]');
           emailMsg = this.checkEmail(value);
@@ -688,6 +700,14 @@ class AddNewEditProposal extends Component {
     let msg = '';
     if (value === '') {
       msg = 'Available quantity should not be empty'
+    }
+    return msg;
+  }
+
+  checkYourName(value) {
+    let msg = '';
+    if (value === '') {
+      msg = 'Your Name field should not be empty'
     }
     return msg;
   }

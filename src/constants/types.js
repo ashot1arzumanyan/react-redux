@@ -4,7 +4,6 @@ const types = [
     "banjarexen",
     "mirg",
     "hataptux",
-    "ynkuzexen",
     "chir_ev_charaz",
     "pahaconer",
     "kanachexen",

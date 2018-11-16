@@ -10,7 +10,17 @@ class HeaderProposalDemandItem extends Component {
     return (
       <div className='d-flex justify-content-between'>
         <span>{cFF.subTypes[subType]}</span>
-        <span><small className='text-muted'>1 {common.units[unit]} </small>{price}<small className='text-muted'> dram</small></span>
+        <span>
+          <small 
+            className='text-muted'>
+            1 {common.units[unit]} 
+          </small>
+          {` ${price}  `}
+          <img 
+            alt='AMD'
+            src={require('./images/armenian_dram_sign.svg')}
+          />
+        </span>
       </div>
     )
   }
