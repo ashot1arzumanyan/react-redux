@@ -6,6 +6,7 @@ const initialState = {
     isFirstLogin: false,
     email: '',
     username: '',
+    _id: '',
     errors: []
 }
 
@@ -53,7 +54,8 @@ const user = (state = initialState, action) => {
                 ...state,
                 isLoggedIn: false,
                 email: '',
-                username: ''
+                username: '',
+                _id: ''
             }
         case types.SET_USER_EMAIL:
             return {

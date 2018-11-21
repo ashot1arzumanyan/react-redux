@@ -1,9 +1,10 @@
 import * as types from './constant-types'
 
-const getProposals = () => {
+const getProposals = (skip, link) => {
     return (dispatch) => {
         dispatch(getProposalsStartFetching())
-        fetch('/getProposals', {
+        const linkOrDefault = link ? link : 'a';
+        fetch(`/getProposals/${linkOrDefault}?skip=${skip}`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -14,7 +15,7 @@ const getProposals = () => {
         })
         .then((data) => {
             if(data.ok) {
-                return dispatch(getProposalsSuccess(data.proposals));
+                return dispatch(getProposalsSuccess(data));
             }
             throw new Error(data.errors || 'Something wrong')
         })
@@ -31,10 +32,10 @@ const getProposalsStartFetching = () => {
     }
 }
 
-const getProposalsSuccess = proposals => {
+const getProposalsSuccess = data => {
     return {
         type: types.GET_PROPOSALS_SUCCESS,
-        payload: proposals
+        payload: data
     }
 }
 

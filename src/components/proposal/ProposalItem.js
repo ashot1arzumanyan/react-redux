@@ -41,7 +41,7 @@ class ProposalItem extends Component {
             unit={unit}
             price={price}
           />
-          <hr></hr>
+          <hr style={{width: '100%', transition: 'width 300ms'}}></hr>
           {this.state.isContactsOpen ? (
             <Contacts 
               email={email}

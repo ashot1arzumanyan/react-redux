@@ -16,8 +16,8 @@ const addNewProposalAction = (data, cb) => {
             })
             .then((data) => {
                 if(data.ok) {
-                    cb()
-                    return dispatch(saveProposalSuccess(data));
+                    dispatch(saveProposalSuccess(data.proposal));
+                    return cb()
                 }
                 throw new Error(data.errors || 'Something wrong')
             })
@@ -41,10 +41,10 @@ const addNewProposalStartFetching = () => {
     }
 }
 
-const saveProposalSuccess = data => {
+const saveProposalSuccess = proposal => {
     return {
         type: types.SAVE_PROPOSAL_SUCCESS,
-        payload: data
+        payload: [proposal]
     }
 }
 

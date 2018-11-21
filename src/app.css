@@ -211,3 +211,29 @@ ul.select {
     width: 50%;
     padding: 0 15px
 }
+
+.contact_info {
+    font-size: 2px;
+    top: 60px;
+    text-align: center;
+    border-radius: 100%;
+    transition: font-size 100ms, top 100ms;
+}
+
+.Proposal .contact_info {
+    background-color: #7eca8f
+}
+
+.Demand .contact_info {
+    background-color: #ea858f
+}
+
+@keyframes showContacts {
+    from {opacity: 0}
+    to {opacity: 1}
+}
+
+.Contacts {
+    animation-name: showContacts;
+    animation-duration: 900ms; 
+}

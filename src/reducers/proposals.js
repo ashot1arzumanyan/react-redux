@@ -1,10 +1,13 @@
 import * as types from '../actions/constant-types'
 
 const initialState = {
+    skip: 0,
+    count: 10,
     isFetchingGet: false,
     isFetchingAddNew: false,
     proposals: [],
-    errors: []
+    errors: [],
+    linkToCachedAll: 'a'
 }
 
 const proposals = (state = initialState, action) => {
@@ -15,12 +18,17 @@ const proposals = (state = initialState, action) => {
                 isFetchingGet: true
             } 
         case types.GET_PROPOSALS_SUCCESS:
+            const { proposals, skip, count, linkToCachedAll } = action.payload
             return {
                 ...state,
-                proposals: action.payload,
+                proposals: [...state.proposals, ...proposals],
+                skip: skip ? skip : state.count,
+                count: count ? count : state.count,
                 errors: [],
-                isFetchingGet: false
+                isFetchingGet: false,
+                linkToCachedAll: linkToCachedAll ? linkToCachedAll : state.linkToCachedAll
             } 
+            
         case types.GET_PROPOSALS_FAIL:
             return {
                 ...state,
@@ -35,6 +43,9 @@ const proposals = (state = initialState, action) => {
         case types.SAVE_PROPOSAL_SUCCESS:
             return {
                 ...state,
+                proposals: [ ...action.payload, ...state.proposals ],
+                skip: state.skip + 1,
+                count: state.count + 1,
                 isFetchingAddNew: false
             } 
         case types.SAVE_PROPOSAL_FAIL:
@@ -42,6 +53,21 @@ const proposals = (state = initialState, action) => {
                 ...state,
                 errors: action.payload,
                 isFetchingAddNew: false
+            } 
+        case types.DELETE_PROPOSAL_SUCCESS:
+            const proposalsWithoutDeletedItem = state.proposals.filter(
+                p => p._id !== action.payload 
+            )
+            return {
+                ...state,
+                proposals: proposalsWithoutDeletedItem,
+                skip: state.skip === 0 ? 0 : state.skip - 1,
+                count: state.count === 0 ? 0 : state.count - 1
+            } 
+        case types.DELETE_PROPOSAL_FAIL:
+            return {
+                ...state,
+                errors: action.payload,
             } 
         case types.EDIT_PROPOSAL_START_FETCHING:
             return {

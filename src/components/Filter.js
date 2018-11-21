@@ -9,6 +9,8 @@ import types_subTypes from '../constants/types_subTypes'
 
 import getSumOfAction from '../actions/getSumOfAction'
 import { addFilter, deleteFilter } from '../actions/filterByAction'
+import getDemandsAction from '../actions/getDemandsAction'
+import getProposalsAction from '../actions/getProposalsAction'
 
 class Filter extends Component {
   constructor(props) {
@@ -35,11 +37,9 @@ class Filter extends Component {
   }
 
   componentDidMount() {
-    if (this.props.filterBy) {
-      setTimeout(() => {
-        this.props.getSumOfAction()        
-      }, 0);
-    }
+    setTimeout(() => {
+      this.props.getSumOfAction()        
+    }, 0);
     this.regions = regions
     this.regions_cities = regions_cities
     this.types = types
@@ -60,12 +60,6 @@ class Filter extends Component {
       const ul = target.querySelector('ul');                                                                                                                  
       input.blur();                                                                                                                         
       ul.style.display = 'none';
-      const name = input.name;
-      if (!this.props.filterBy && (name === 'city' || name === 'subType')) {
-        const isBlurred = { ...this.props.isBlurred }
-        this.props.setIsBlurred(isBlurred, name)  
-        this.props.validate(name, input.value) 
-      }
       target.removeEventListener('mouseleave', hideEl); 
     }                                                                                                                                                            
     target.parentElement.addEventListener('mouseleave', hideEl);
@@ -78,14 +72,11 @@ class Filter extends Component {
   keyUp(target) {
     const value = target.value.toLowerCase();
     const name = target.name;
-
     if (value) {
       this.setState({ resetBtns: {[name]: true} })
     } else {
       this.setState({ resetBtns: {[name]: false} })
-      if (this.props.filterBy) {
-        this.props.deleteFilter(name);
-      }
+      this.props.deleteFilter(name);
     }
 
     if (name === 'region') {
@@ -111,8 +102,8 @@ class Filter extends Component {
     const regionInput = document.querySelector('input[name="region"]');
     regionInput.value = this.props.content.regions[regionEn];
     regionInput.dataset.en = regionEn;
-    const evn = new Event('input', { bubbles: true });
-    regionInput.dispatchEvent(evn);
+    // const evn = new Event('input', { bubbles: true });
+    // regionInput.dispatchEvent(evn);
   }
 
   clickOnType(target) {
@@ -127,11 +118,25 @@ class Filter extends Component {
     const typeInput = document.querySelector('input[name="type"]');
     typeInput.value = this.props.content.types[typeEn];
     typeInput.dataset.en = typeEn;
-    const evn = new Event('input', { bubbles: true });
-    typeInput.dispatchEvent(evn);
+    // const evn = new Event('input', { bubbles: true });
+    // typeInput.dispatchEvent(evn);
   }
 
   setInputValue(target) {
+    const { 
+      skip_demand, 
+      count_demand, 
+      isFetchingGet_demand, 
+      linkToCachedAll_demand, 
+      getDemandsAction,
+      skip_proposal, 
+      count_proposal, 
+      isFetchingGet_proposal, 
+      linkToCachedAll_proposal, 
+      getProposalsAction, 
+      addFilter 
+
+    } = this.props
     const value = target.firstChild.data;
     const input = target.parentElement.parentElement.querySelector('input');
     const resetBtns = { ...this.state.resetBtns };
@@ -140,11 +145,15 @@ class Filter extends Component {
     const currentEn = target.dataset.en;                                                                                                 
     input.value = value;
     input.dataset.en = currentEn;
-    if (this.props.filterBy) {
-      this.props.addFilter({[input.name]: currentEn})
+    if (skip_demand < count_demand && !isFetchingGet_demand) {
+      getDemandsAction(skip_demand, linkToCachedAll_demand)
     }
-    const evn = new Event('input', { bubbles: true });
-    input.dispatchEvent(evn);
+    if (skip_proposal < count_proposal && !isFetchingGet_proposal) {
+      getProposalsAction(skip_proposal, linkToCachedAll_proposal)
+    }
+    addFilter({[input.name]: currentEn})
+    // const evn = new Event('input', { bubbles: true });
+    // input.dispatchEvent(evn);
   }
 
   resetValue(target) {
@@ -154,9 +163,7 @@ class Filter extends Component {
   }
 
   resetFilter(param) {
-    if (this.props.filterBy) {
-      this.props.deleteFilter(param);
-    }
+    this.props.deleteFilter(param);
     const resetBtns = { ...this.state.resetBtns };
     resetBtns[param] = false;
     if (param === 'region') {
@@ -226,15 +233,9 @@ class Filter extends Component {
 
   render() {
     
-    const { content, common, sumOf, filterBy, onInput, isBlurred, isInvalidMsg } = this.props
-    
-    const valid = (name) => filterBy ? null : isBlurred[name] && isInvalidMsg[name] === ''
-    const inValid = (name) => filterBy ? null : isBlurred[name] && isInvalidMsg[name] !== ''
-    
+    const { content, common, sumOf } = this.props
+        
     const Badges = ({sumOfType, referer }) => {
-      if (!filterBy) {
-        return ''
-      }
       return (
         <span>
           <Badge color="success">{sumOfType[referer].proposal}</Badge>
@@ -291,11 +292,7 @@ class Filter extends Component {
               onMouseOver={e => this.mouseOver(e.target)} 
               onFocus={e => this.focus(e.target)}
               onKeyUp={e => this.keyUp(e.target)}
-              onInput={onInput}
-              valid={valid('city')}
-              invalid={inValid('city')}
             />
-            <FormFeedback>{ filterBy ? '' : isInvalidMsg.city }</FormFeedback>  
             <ListGroup style={{display: 'none'}} className='select'>
               {this.state.regions_cities.map(region_city => 
                 <ListGroupItem
@@ -342,11 +339,7 @@ class Filter extends Component {
               onMouseOver={e => this.mouseOver(e.target)} 
               onFocus={e => this.focus(e.target)}
               onKeyUp={e => this.keyUp(e.target)}
-              onInput={onInput}
-              valid={valid('subType')}
-              invalid={inValid('subType')}
             />
-            <FormFeedback>{ filterBy ? '' : isInvalidMsg.subType }</FormFeedback>  
             <ListGroup style={{display: 'none'}} className='select'>
               {this.state.types_subTypes.map(type_subType => 
                 <ListGroupItem
@@ -372,9 +365,21 @@ const mapStateToProps = (state) => {
     content: state.content.Filter,
     common: state.content.common,
     sumOf: state.sumOf,
-    addFilter: (dispatch) => dispatch(this.props.addFilter),
-    deleteFilter: (dispatch) => dispatch(this.props.deleteFilter)
+    skip_demand: state.demands.skip,
+    count_demand: state.demands.count,
+    isFetchingGet_demand: state.demands.isFetchingGet,
+    linkToCachedAll_demand: state.demands.linkToCachedAll,
+    skip_proposal: state.proposals.skip,
+    count_proposal: state.proposals.count,
+    isFetchingGet_proposal: state.proposals.isFetchingGet,
+    linkToCachedAll_proposal: state.proposals.linkToCachedAll
   }
 }
 
-export default connect(mapStateToProps, {getSumOfAction, addFilter, deleteFilter})(Filter);
+export default connect(mapStateToProps, {
+  getSumOfAction, 
+  addFilter, 
+  deleteFilter,
+  getDemandsAction,
+  getProposalsAction
+})(Filter);

@@ -18,7 +18,7 @@ const addNewDemandAction = (data, cb) => {
         .then((data) => {
             if(data.ok) {
                 cb()
-                return dispatch(saveDemandSuccess(data));
+                return dispatch(saveDemandSuccess(data.demand));
             }
             throw new Error(data.errors || 'Something wrong')
         })
@@ -42,10 +42,10 @@ const addNewDemandStartFetching = () => {
     }
 }
 
-const saveDemandSuccess = data => {
+const saveDemandSuccess = demand => {
     return {
         type: types.SAVE_DEMAND_SUCCESS,
-        payload: data
+        payload: [demand]
     }
 }
 

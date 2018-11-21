@@ -8,14 +8,17 @@ import selected_proposals from '../../selectors/selected_proposals'
 class Proposal extends Component {
 
   componentDidMount() {
-    this.props.getProposalsAction()
+    const { skip } = this.props
+    if (skip === 0) {
+      this.props.getProposalsAction(skip)
+    }
   }
 
   render() {
 
     const { proposals, isFetchingGet } = this.props
 
-    if(isFetchingGet) {
+    if(isFetchingGet && proposals.length === 0) {
       return (
         <div>Loading...</div>
       )
@@ -31,6 +34,9 @@ class Proposal extends Component {
             />
           </div>
         )}
+        {isFetchingGet ? (
+          <div style={{marginBottom: '10px'}}>Loading...</div>
+        ) : ('')}
       </Fragment>
     )
   }
@@ -39,7 +45,6 @@ class Proposal extends Component {
 const mapStateToProps = (state) => {
   return{
     proposals: selected_proposals(state),
-    isFetchingGet: state.proposals.isFetchingGet,
   }
 }
 
