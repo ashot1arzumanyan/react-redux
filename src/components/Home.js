@@ -43,8 +43,8 @@ class Home extends Component {
       window.innerHeight;
 
     const scrollToBottom = Math.ceil( (scrollTop + clientHeight) ) >= scrollHeight
-    console.log(scrollToBottom);
-    console.log(count_proposal, count_demand);
+    // console.log(scrollToBottom);
+    // console.log(count_proposal, count_demand);
     if (scrollToBottom) {
       if (skip_proposal < count_proposal && !isFetchingGet_proposal) {
         this.props.getProposalsAction(skip_proposal, linkToCachedAll_proposal)
