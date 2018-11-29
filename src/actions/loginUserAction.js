@@ -16,8 +16,9 @@ const loginUser = (userInfo, cb) => {
         .then((data) => {
             if(data.ok) {
                 localStorage.setItem('access_token', data.access_token);
+                dispatch(loginSucces(data.user));
                 cb();
-                return dispatch(loginSucces(data.user));
+                return
             }
             throw new Error(data.errors || 'Something wrong')
         })

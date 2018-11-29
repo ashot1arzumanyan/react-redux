@@ -3,23 +3,18 @@ import { connect } from 'react-redux'
 import { FormGroup, Label, Input, Form, Button } from 'reactstrap'
 
 import InputWithJumperLabel from '../helpers/InputWithJumperLabel'
-import InputLabel from './inputs/InputLabel'
 import { startSendEmail, resetPasswordSendEmail } from '../actions/resetPasswordSendEmailAction'
 
-class ResetPasswordSendEmail extends Component {
+class SendVerificationCode extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
       isInvalidMsg: {
         email: '',
-        password: '',
-        repeat_password: ''
       },
       isBlurred: {
         email: false,
-        password: false,
-        repeat_password: false
       }
     }
 
@@ -50,7 +45,7 @@ class ResetPasswordSendEmail extends Component {
   handleSendEmail(e) {
     e.preventDefault()
     this.props.startSendEmail()
-    this.props.resetPasswordSendEmail(this.state)
+    this.props.resetPasswordSendEmail({ email: this.state.email })
   }
 
   render() {
@@ -58,13 +53,13 @@ class ResetPasswordSendEmail extends Component {
     const { common } = this.props
     const { isBlurred, isInvalidMsg } = this.state
 
-    const commonProps = {
-      onFocus: this.handleOnFocus,
-      onBlur: this.handleOnBlur,
-      onInput: this.handleOnInput,
-      isBlurred: isBlurred,
-      isInvalidMsg: isInvalidMsg
-    }
+    // const commonProps = {
+    //   onFocus: this.handleOnFocus,
+    //   onBlur: this.handleOnBlur,
+    //   onInput: this.handleOnInput,
+    //   isBlurred: isBlurred,
+    //   isInvalidMsg: isInvalidMsg
+    // }
 
     return (
       <div className='d-flex flex-column align-items-center'>
@@ -85,27 +80,6 @@ class ResetPasswordSendEmail extends Component {
             >
             Send Verification code
           </Button>
-          <InputLabel 
-            name='password'
-            type='password'
-            commonProps={commonProps}
-          />
-          <InputLabel 
-            name='repeat_password'
-            type='password'
-            commonProps={commonProps}
-          />
-          <FormGroup className='jumperLabel'>
-            <Label for='verification_code'>Verification code</Label>
-            <Input 
-              id='verification_code'
-              type='text'
-              name='verification_code'
-              onInput={this.handleOnInput}
-              onFocus={this.handleOnFocus}
-              onBlur={this.handleOnBlur}
-            />         
-          </FormGroup>
         </Form>
       </div>
     ) 
@@ -115,9 +89,7 @@ class ResetPasswordSendEmail extends Component {
 const mapstateToProps = (state) => {
   return {
     common: state.content.common,
-    startSendEmail: state.startSendEmail,
-    resetPasswordSendEmail: state.resetPasswordSendEmail
   }
 }
 
-export default connect(mapstateToProps, {startSendEmail, resetPasswordSendEmail})(ResetPasswordSendEmail)
+export default connect(mapstateToProps, {startSendEmail, resetPasswordSendEmail})(SendVerificationCode)

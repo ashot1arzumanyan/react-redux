@@ -12,8 +12,6 @@ class DemandItem extends Component {
 
   constructor(props) {
     super(props)
-    this.x = 0
-    this.y = 0
     this.isMouseMove = true
     this.state = {
       isContactsOpen: false
@@ -42,6 +40,7 @@ class DemandItem extends Component {
 
   handleMouseLeave() {
     this.card.style.transform = `rotateX(0deg) rotateY(0deg)`
+    this.card.style.boxShadow = '0px 0px 10px 2px rgb(193, 193, 193)';
     this.isMouseMove = true
     setTimeout(() => {
       this.setState({ isContactsOpen: false })

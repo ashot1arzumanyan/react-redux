@@ -52,7 +52,7 @@ class Login extends Component {
   }
 
   switchToResetPassword() {
-    this.props.history.push('/resetPasswordSendEmail')
+    this.props.history.push('/sendVerificationCode')
   }
 
   handleSubmit() {

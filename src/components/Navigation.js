@@ -13,7 +13,8 @@ import EditProposal from './EditProposal';
 import AddNewDemand from './AddNewDemand'
 import EditDemand from './EditDemand'
 import VerifyEmail from './VerifyEmail'
-import ResetPasswordSendEmail from './ResetPasswordSendEmail'
+import SendVerificationCode from './SendVerificationCode'
+import ResetPassword from './ResetPassword'
 import MyStatements from './MyStatements'
 
 import Protected from './Protected'
@@ -150,7 +151,8 @@ class Navigation extends Component {
           <Route path='/login' component={Login} />
           <Route path='/register' component={Register} />
           <Route path='/verifyEmail' component={VerifyEmail} />
-          <Route path='/resetPasswordSendEmail' component={ResetPasswordSendEmail} />
+          <Route path='/sendVerificationCode' component={SendVerificationCode} />
+          <Route path='/resetPassword' component={ResetPassword} />          
           <Route path='/myStatements' component={Protected(MyStatements)} />
 
         </div>
