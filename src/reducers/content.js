@@ -1,4 +1,5 @@
 const initialState = {
+    lang: 'hy',
     common: {
         proposal: "",
         demand: "",

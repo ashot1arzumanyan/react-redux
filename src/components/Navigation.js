@@ -56,85 +56,87 @@ class Navigation extends PureComponent {
 
     return (
       <Router history={history}>
-        <nav>
-          <ul className="Navigation d-flex justify-content-between position-relative">
-            <li className="nav-item">
-              <Link 
-                className='nav-link'
-                to="/">
-                <Logo />
-              </Link>
-            </li>
-            <li>
-              <ul className='d-flex justify-content-between'>
-                <li className="nav-item">
-                  <Link 
-                    className='nav-link green'  
-                    to="/addNewProposal">
-                    {content.addNewProposal}
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link 
-                    className='nav-link red'
-                    to="/addNewDemand">
-                    {content.addNewDemand}
-                  </Link>
-                </li>
-              </ul>
-            </li>
-            {!this.props.user.isLoggedIn ? (
+        <React.Fragment>
+          <nav>
+            <ul className="Navigation d-flex justify-content-between position-relative">
+              <li className="nav-item">
+                <Link 
+                  className='nav-link'
+                  to="/">
+                  <Logo />
+                </Link>
+              </li>
               <li>
                 <ul className='d-flex justify-content-between'>
                   <li className="nav-item">
                     <Link 
-                      className='nav-link'
-                      to="/login">
-                      {content.login}
+                      className='nav-link green'  
+                      to="/addNewProposal">
+                      {content.addNewProposal}
                     </Link>
                   </li>
                   <li className="nav-item">
                     <Link 
-                      className='nav-link'
-                      to="/register">
-                      {content.register}
+                      className='nav-link red'
+                      to="/addNewDemand">
+                      {content.addNewDemand}
                     </Link>
                   </li>
                 </ul>
               </li>
-            ) : (
-              <NavigationDropdownItem 
-                handleLogout={this.logout}
-                history={history}
-                username={username}
-                my_statements={content.my_statements}
-                settings={content.settings}
-                logout={content.logout}
-              />
-            )}
+              {!this.props.user.isLoggedIn ? (
+                <li>
+                  <ul className='d-flex justify-content-between'>
+                    <li className="nav-item">
+                      <Link 
+                        className='nav-link'
+                        to="/login">
+                        {content.login}
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link 
+                        className='nav-link'
+                        to="/register">
+                        {content.register}
+                      </Link>
+                    </li>
+                  </ul>
+                </li>
+              ) : (
+                <NavigationDropdownItem 
+                  handleLogout={this.logout}
+                  history={history}
+                  username={username}
+                  my_statements={content.my_statements}
+                  settings={content.settings}
+                  logout={content.logout}
+                />
+              )}
 
-            <li className='light-dark'>
-              <ul className='d-flex justify-content-between'>
-                <li className="nav-item">
-                  <span 
-                    className='nav-link cursor-pointer'
-                    onClick={this.toggleMode}>
-                    Light
-                  </span>
-                </li>
-                <li className="nav-item">
-                  <span 
-                    className='nav-link cursor-pointer'
-                    onClick={this.toggleMode}>
-                    Dark
-                  </span>
-                </li>
-              </ul>
-            </li>
-            <li>
-              <SwitchLangs />
-            </li>
-          </ul>
+              <li className='light-dark'>
+                <ul className='d-flex justify-content-between'>
+                  <li className="nav-item">
+                    <span 
+                      className='nav-link cursor-pointer'
+                      onClick={this.toggleMode}>
+                      Light
+                    </span>
+                  </li>
+                  <li className="nav-item">
+                    <span 
+                      className='nav-link cursor-pointer'
+                      onClick={this.toggleMode}>
+                      Dark
+                    </span>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <SwitchLangs />
+              </li>
+            </ul>
+          </nav>
 
           <Route exact path='/' component={Home} />
           <Route path='/addNewProposal' component={Protected(AddNewProposal)} />
@@ -150,7 +152,8 @@ class Navigation extends PureComponent {
           <Route path='/settings' component={Protected(Settings)} />
 
           <WarningAlertFromServer />
-        </nav>
+
+        </React.Fragment>
       </Router>
     )
   }

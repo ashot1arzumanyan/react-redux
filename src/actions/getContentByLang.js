@@ -15,16 +15,19 @@ const getContentByLang = lang => {
             .then(res => res.json())
             .then(data => {
                 localStorage.setItem('lang', lang);
-                dispatch(setLang(data));
+                dispatch(setLang(data, lang));
             })
             .catch(err => console.log(err))
     }
 }
 
-const setLang = (content) => {
+const setLang = (content, lang) => {
     return {
         type: 'SET_LANG',
-        payload: content
+        payload: {
+            ...content,
+            lang: lang
+        }
     }
 }
 

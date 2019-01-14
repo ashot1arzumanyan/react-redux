@@ -11,7 +11,7 @@ import checkToken from './actions/checkTokenAction'
 import getStatementsAction from './actions/getStatementsAction'
 import getSumOfAction from './actions/getSumOfAction'
 import setTitle from './helpers/setTitle'
-import SEO from './components/SEO'
+import SEO from './components/SEO/SEO'
 
 import './bootstrap.css'
 import './app.css'
