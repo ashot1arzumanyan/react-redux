@@ -1,24 +1,37 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Input, ListGroup, ListGroupItem, Badge, FormFeedback } from 'reactstrap'
+import { Input, ListGroup, Badge } from 'reactstrap'
 
 import regions from '../constants/regions'
 import regions_cities from '../constants/regions_cities'
 import types from '../constants/types'
 import types_subTypes from '../constants/types_subTypes'
 
-import getSumOfAction from '../actions/getSumOfAction'
 import { addFilter, deleteFilter } from '../actions/filterByAction'
-import getDemandsAction from '../actions/getDemandsAction'
-import getProposalsAction from '../actions/getProposalsAction'
+import getStatementsAction from '../actions/getStatementsAction'
+import { regionFiltersSumOfAction, cityFiltersSumOfAction, typeFiltersSumOfAction } from '../actions/filtersSumOfAction'
 
 class Filter extends Component {
   constructor(props) {
     super(props)
-    this.regions = []
-    this.regions_cities = []
-    this.types = []
-    this.types_subTypes = []
+    this.counts = {
+      region: {
+        proposal: '',
+        demand: ''
+      },
+      city: {
+        proposal: '',
+        demand: ''
+      },
+      type: {
+        proposal: '',
+        demand: ''
+      },
+      subType: {
+        proposal: '',
+        demand: ''
+      }
+    }
     this.state = {
       regions: [],
       regions_cities: [],
@@ -29,135 +42,234 @@ class Filter extends Component {
         city: false,
         type: false,
         subType: false
+      },
+      openList: {
+        region: false,
+        city: false,
+        type: false,
+        subType: false
       }
     }
 
     this.focus = this.focus.bind(this)
     this.mouseOver = this.mouseOver.bind(this)
+    this.clickOnRegion = this.clickOnRegion.bind(this)
+    this.clickOnCity = this.clickOnCity.bind(this)
+    this.clickOnType = this.clickOnType.bind(this)
+    this.clickOnSubType = this.clickOnSubType.bind(this)
+    this.checkGetStatementsFilterSumOf = this.checkGetStatementsFilterSumOf.bind(this)
+    this.setFilter = this.setFilter.bind(this)
+    this.checkResetBtn = this.checkResetBtn.bind(this)
+    this.checkAndSetCounts = this.checkAndSetCounts.bind(this)
+    this.setInputValue = this.setInputValue.bind(this)
+    this.resetValue = this.resetValue.bind(this)
   }
 
   componentDidMount() {
-    setTimeout(() => {
-      this.props.getSumOfAction()        
-    }, 0);
-    this.regions = regions
-    this.regions_cities = regions_cities
-    this.types = types
-    this.types_subTypes = types_subTypes
     this.setState({
-      regions: this.regions,
-      regions_cities: this.regions_cities,
-      types: this.types,
-      types_subTypes: this.types_subTypes,
+      regions: regions,
+      regions_cities: regions_cities,
+      types: types,
+      types_subTypes: types_subTypes,
     })
   }
 
-  mouseOver(target) {
+  mouseOver(e) {
+    const target = e.target;
     target.focus();
+    const listenEnterUpDown = (() => {
+      let selected = -1;
+      return function(e) {
+          const lies = e.target.parentElement.querySelectorAll('li');
+          if (!lies.length || selected > lies.length - 1) {
+              selected = -1;
+              return
+          }
+          // if (e.keyCode === 9) {
+          //     return
+          // }
+          if(e.keyCode === 40) {
+              if (selected < lies.length - 1) {
+                  if (lies[selected]) {
+                      lies[selected].classList.remove('hovered_list_item') 
+                  }
+                  selected += 1;
+                  if (lies[selected]) {
+                      lies[selected].classList.add('hovered_list_item') 
+                      lies[selected].scrollIntoView({block: 'end'})
+                  }
+              }
+          } else if (e.keyCode === 38) {
+              if (selected > 0) {
+                  if (lies[selected]) {
+                      lies[selected].classList.remove('hovered_list_item') 
+                  }
+                  selected -= 1;
+                  if (lies[selected]) {
+                      lies[selected].classList.add('hovered_list_item') 
+                      lies[selected].scrollIntoView({block: 'end'})
+                  }
+              }
+          } else if (e.keyCode === 13) {
+              if (selected >= 0) {
+                  // const input = e.target.parentElement.querySelector('input')
+                  // input.value = lies[selected].innerText
+                  const evn = new Event('click', { bubbles: true })
+                  lies[selected].dispatchEvent(evn)
+                  // e.target.parentElement.dispatchEvent(new Event('mouseleave', {bubbles: true}))
+                  // selected = 0
+                  // lies[selected].classList.remove('hovered_list_item') 
+                  // e.target.removeEventListener('keyup', listenEnterUpDown);
+              }
+          } else {
+              if (lies[selected]) {
+                  lies[selected].classList.remove('hovered_list_item') 
+              }
+              selected = -1
+          }
+      }
+  })();
     const hideEl = (ev) => {                                                                                                                                     
       const target = ev.target;
       const input = target.querySelector('input'); 
-      const ul = target.querySelector('ul');                                                                                                                  
+      // const ul = target.querySelector('ul');                                                                                                                  
       input.blur();                                                                                                                         
-      ul.style.display = 'none';
+      // ul.style.display = 'none';
+      const openList = { ...this.state.openList };
+      openList[input.name] = false;
+      this.setState({ 
+        openList: openList  
+      })
+      input.removeEventListener('keyup', listenEnterUpDown);
       target.removeEventListener('mouseleave', hideEl); 
     }                                                                                                                                                            
     target.parentElement.addEventListener('mouseleave', hideEl);
+    target.removeEventListener('keyup', listenEnterUpDown);
+    target.addEventListener('keyup', listenEnterUpDown);
   }
 
-  focus(target) {                                                                                                                                            
-    target.parentElement.querySelector('ul').style.display = 'block'; 
+  focus(target) {
+    const openList = { ...this.state.openList };
+    openList[target.name] = true;
+    this.setState({ 
+      openList: openList  
+    })
+    // target.parentElement.querySelector('ul').style.display = 'block'; 
   }
 
-  keyUp(target) {
+  handleInput(target) {
     const value = target.value.toLowerCase();
     const name = target.name;
-    if (value) {
-      this.setState({ resetBtns: {[name]: true} })
-    } else {
-      this.setState({ resetBtns: {[name]: false} })
+    if (!value) {
       this.props.deleteFilter(name);
+      this.props.resetCounts(name);
     }
-
     if (name === 'region') {
-      return this.filterRegionOrType(value, 'regions')
+      return this.filterRegion(value)
     } else if (name === 'city') {
       return this.filterCity(value)
     } else if (name === 'type') {
-      return this.filterRegionOrType(value, 'types')
+      return this.filterType(value)
     } else if (name === 'subType') {
       return this.filterSubType(value)
     }
   }
 
-  clickOnRegion(target) {
-    this.setInputValue(target);
-    const regionEn = target.dataset.en;
-    this.filterCityByRegion(regionEn);
+  checkGetStatementsFilterSumOf(filterSumOf) {
+    const { p, d, getStatementsAction } = this.props
+    if (p.skip !== 0 && d.skip !== 0 && ((p.skip < p.count && !p.isFetchingGet) || (d.skip < d.count && !d.isFetchingGet))) {
+      setTimeout(() => {        
+        getStatementsAction(
+          p.skip, 
+          p.linkToCachedAll, 
+          d.skip, 
+          d.linkToCachedAll,
+          filterSumOf, 
+        )
+      }, 100);
+    } else {
+      if (filterSumOf) filterSumOf()
+    }
   }
 
-  clickOnCity(target) {
-    this.setInputValue(target);
-    const regionEn = target.dataset.region;
-    const regionInput = document.querySelector('input[name="region"]');
-    regionInput.value = this.props.content.regions[regionEn];
-    regionInput.dataset.en = regionEn;
-    // const evn = new Event('input', { bubbles: true });
-    // regionInput.dispatchEvent(evn);
+  clickOnRegion(e) {
+    this.setInputValue(e.target);
+    this.filterCityByRegion(e.target.dataset.en);
+    this.checkGetStatementsFilterSumOf(this.props.regionFiltersSumOfAction);
   }
 
-  clickOnType(target) {
-    this.setInputValue(target);
-    const typeEn = target.dataset.en;
-    this.filterSubTypeByType(typeEn);
+  clickOnCity(e) {
+    this.setInputValue(e.target);
+    this.checkGetStatementsFilterSumOf(this.props.cityFiltersSumOfAction);
   }
 
-  clickOnSubType(target) {
-    this.setInputValue(target);
-    const typeEn = target.dataset.type;
-    const typeInput = document.querySelector('input[name="type"]');
-    typeInput.value = this.props.content.types[typeEn];
-    typeInput.dataset.en = typeEn;
-    // const evn = new Event('input', { bubbles: true });
-    // typeInput.dispatchEvent(evn);
+  clickOnType(e) {
+    this.setInputValue(e.target);
+    this.filterSubTypeByType(e.target.dataset.en);
+    this.checkGetStatementsFilterSumOf(this.props.typeFiltersSumOfAction);
+  }
+
+  clickOnSubType(e) {
+    this.setInputValue(e.target);
+    this.checkGetStatementsFilterSumOf(null)
   }
 
   setInputValue(target) {
-    const { 
-      skip_demand, 
-      count_demand, 
-      isFetchingGet_demand, 
-      linkToCachedAll_demand, 
-      getDemandsAction,
-      skip_proposal, 
-      count_proposal, 
-      isFetchingGet_proposal, 
-      linkToCachedAll_proposal, 
-      getProposalsAction, 
-      addFilter 
-
-    } = this.props
-    const value = target.firstChild.data;
-    const input = target.parentElement.parentElement.querySelector('input');
-    const resetBtns = { ...this.state.resetBtns };
-    resetBtns[input.name] = true;
-    this.setState({resetBtns: resetBtns})
+    const input = target.parentElement.previousElementSibling
     const currentEn = target.dataset.en;                                                                                                 
+    this.props.addFilter({[input.name]: currentEn});
+    const value = target.firstChild.data;
+    this.setFilter(input.name)
     input.value = value;
     input.dataset.en = currentEn;
-    if (skip_demand < count_demand && !isFetchingGet_demand) {
-      getDemandsAction(skip_demand, linkToCachedAll_demand)
+    const countsSpans = target.children[0].children;
+    this.props.setCounts(countsSpans[0].innerText, countsSpans[1].innerText);
+    this.counts[input.name] = {
+      proposal: countsSpans[0].innerText,
+      demand: countsSpans[1].innerText
     }
-    if (skip_proposal < count_proposal && !isFetchingGet_proposal) {
-      getProposalsAction(skip_proposal, linkToCachedAll_proposal)
-    }
-    addFilter({[input.name]: currentEn})
-    // const evn = new Event('input', { bubbles: true });
-    // input.dispatchEvent(evn);
   }
 
-  resetValue(target) {
-    const input = target.parentElement.parentElement.querySelector('input');
+  setFilter(param) {
+    const resetBtns = { ...this.state.resetBtns }
+    let listsToSetDefault = {}
+    resetBtns[param] = true
+    switch (param) {
+      case 'region':
+        resetBtns.city = this.checkResetBtn('city')
+        resetBtns.type = this.checkResetBtn('type')
+        resetBtns.subType = this.checkResetBtn('subType')
+        listsToSetDefault = {
+          regions_cities: regions_cities,
+          types: types,
+          types_subTypes: types_subTypes
+        }
+        break;
+      case 'city':
+        resetBtns.type = this.checkResetBtn('type')
+        resetBtns.subType = this.checkResetBtn('subType')
+        listsToSetDefault = {
+          types: types,
+          types_subTypes: types_subTypes
+        }
+        break;
+      case 'type': 
+        resetBtns.subType = this.checkResetBtn('subType')
+        listsToSetDefault = {
+          types_subTypes: types_subTypes
+        }
+        break;
+      default:
+        break;
+    }
+    this.setState({ 
+      resetBtns: resetBtns, 
+      ...listsToSetDefault
+    })
+  }
+
+  resetValue(e) {
+    const input = e.target.nextElementSibling;
     input.value = '';
     this.resetFilter(input.name);
   }
@@ -165,45 +277,120 @@ class Filter extends Component {
   resetFilter(param) {
     this.props.deleteFilter(param);
     const resetBtns = { ...this.state.resetBtns };
+    const openList = { ...this.state.openList };
+    let listsToSetDefault = {};
     resetBtns[param] = false;
-    if (param === 'region') {
-      return this.setState({
-        regions: this.regions,
-        regions_cities: this.regions_cities,
-        resetBtns: resetBtns
-      })
-    } else if (param === 'city') {
-      return this.setState({
-        regions_cities: this.regions_cities,
-        resetBtns: resetBtns
-      })
-    } else if (param === 'type') {
-      return this.setState({
-        types: this.types,
-        types_subTypes: this.types_subTypes,
-        resetBtns: resetBtns
-      })
-    } else if (param === 'subType') {
-      return this.setState({
-        types_subTypes: this.types_subTypes,
-        resetBtns: resetBtns
-      })
+    openList[param] = false;
+    switch(param) {
+      case 'region':
+        resetBtns.city = this.checkResetBtn('city');
+        resetBtns.type = this.checkResetBtn('type');
+        resetBtns.subType = this.checkResetBtn('subType');
+        listsToSetDefault = {
+          regions: regions,
+          regions_cities: regions_cities,
+          types: types,
+          types_subTypes: types_subTypes,
+        };
+        this.props.resetCounts();
+        break;
+      case 'city':
+      resetBtns.type = this.checkResetBtn('type');
+      resetBtns.subType = this.checkResetBtn('subType');
+        listsToSetDefault = {
+          regions_cities: regions_cities,
+          types: types,
+          types_subTypes: types_subTypes,
+        }
+        this.checkAndSetCounts('city')
+        break;
+      case 'type':
+        resetBtns.subType = this.checkResetBtn('subType');
+        listsToSetDefault = {
+          types: types,
+          types_subTypes: types_subTypes,
+        }
+        this.checkAndSetCounts('type')
+        break;
+      case 'subType':
+        listsToSetDefault = {
+          types_subTypes: types_subTypes,
+        }
+        this.checkAndSetCounts('subType')
+        break;
+      default:
+        break
+    }
+    this.setState({
+      resetBtns: resetBtns,
+      openList: openList,
+      ...listsToSetDefault
+    })
+  }
+
+  checkResetBtn(listName) {
+    const resetBtns = { ...this.state.resetBtns }
+    if (resetBtns[listName]) {
+      resetBtns[listName] = false
+      this.props.deleteFilter(listName)
+    }
+    setTimeout(() => {
+      document.querySelector(`input[name=${listName}]`).value = '';
+    }, 0);
+    return resetBtns[listName]
+  }
+
+  checkAndSetCounts(name) {
+    const resetBtns = { ...this.state.resetBtns }
+    let listOfNames = [];
+    switch(name) {
+      case 'city':
+        listOfNames = ['region']
+        break;
+      case 'type':
+        listOfNames = ['city', 'region']
+        break;
+      case 'subType':
+        listOfNames = ['type', 'city', 'region']
+        break;
+      default:
+        break
+    }
+    const isTruty = listOfNames.some(n => {
+      if (resetBtns[n]) {
+        this.props.setCounts(this.counts[n].proposal, this.counts[n].demand)
+        return true
+      }
+      return false
+    })
+    if (!isTruty) {
+      this.props.resetCounts()
     }
   }
 
-  filterRegionOrType(value, regionOrType) {
-    const content = this.props.content[regionOrType];
-    const matched = this[regionOrType].filter(o => {
+  filterRegion(value) {
+    const content = this.props.content.regions;
+    const matched = regions.filter(o => {
       return o.includes(value) || content[o].toLowerCase().includes(value)
     })
     this.setState({
-      [regionOrType]: matched
+      regions: matched
+    })
+  }
+
+  filterType(value) {
+    const content = this.props.content.types;
+    const matched = types.filter(o => {
+      return o.includes(value) || content[o].toLowerCase().includes(value)
+    })
+    this.setState({
+      types: matched
     })
   }
 
   filterCity(value) {
     const cities = this.props.content.cities;
-    const matchedCities = this.regions_cities.filter(region_city => {
+    const matchedCities = regions_cities.filter(region_city => {
       return region_city.city.includes(value) || cities[region_city.city].toLowerCase().includes(value)
     })
     this.setState({regions_cities: matchedCities})
@@ -211,21 +398,21 @@ class Filter extends Component {
 
   filterSubType(value) {
     const subTypes = this.props.content.subTypes;
-    const matchedSubTypes = this.types_subTypes.filter(type_subType => {
+    const matchedSubTypes = types_subTypes.filter(type_subType => {
       return type_subType.subType.includes(value) || subTypes[type_subType.subType].toLowerCase().includes(value)
     })
     this.setState({types_subTypes: matchedSubTypes})
   }
 
   filterCityByRegion(region) {
-    const matchedCities = this.regions_cities.filter(region_city => {
+    const matchedCities = regions_cities.filter(region_city => {
       return region_city.region === region
     })
     this.setState({regions_cities: matchedCities})
   }
 
   filterSubTypeByType(type) {
-    const matchedSubtypes = this.types_subTypes.filter(type_subType => {
+    const matchedSubtypes = types_subTypes.filter(type_subType => {
       return type_subType.type === type
     })
     this.setState({types_subTypes: matchedSubtypes})
@@ -233,131 +420,235 @@ class Filter extends Component {
 
   render() {
     
-    const { content, common, sumOf } = this.props
-        
-    const Badges = ({sumOfType, referer }) => {
-      return (
-        <span>
-          <Badge color="success">{sumOfType[referer].proposal}</Badge>
-          <Badge color="danger">{sumOfType[referer].demand}</Badge>
-        </span>
-      )
-    }
-
-    const CleareBtn = () => {
-      return (
-        <button 
-          type="button" 
-          className='close' 
-          aria-label="Close" 
-          onClick={e => this.resetValue(e.target)}
-          >
-          <span aria-hidden="true">&times;</span>
-        </button>
-      )
-    }
+    const { resetBtns } = this.state
 
     return ( 
-      <div className='Filter my-4 mx-2'>
-        <div className='d-flex justify-content-around'>
-          <div className='position-relative'>
-            {this.state.resetBtns.region ? <CleareBtn /> : null}
-            <Input 
-              name='region' 
-              type='text' 
-              placeholder={common.region}
-              onMouseOver={e => this.mouseOver(e.target)} 
-              onFocus={e => this.focus(e.target)}
-              onKeyUp={e => this.keyUp(e.target)}
-            />             
-            <ListGroup style={{display: 'none'}} className='select'>
-              {this.state.regions.map(region => 
-                <ListGroupItem 
-                  key={region} 
-                  className="d-flex justify-content-between"
-                  data-en={region}
-                  onClick={e => this.clickOnRegion(e.target)}>
-                  {content.regions[region]}
-                  <Badges sumOfType={sumOf.region} referer={region} />
-                </ListGroupItem>
+      <div className='Filter d-flex justify-content-around my-4 mx-2'>
+        <div className='position-relative'>
+          <ResetBtn open={resetBtns.region} handleClick={this.resetValue} />
+          <Input 
+            name='region' 
+            type='text' 
+            tabIndex='-1'
+            autoComplete="off"
+            placeholder={this.props.common.region}
+            onMouseOver={this.mouseOver} 
+            onFocus={e => this.focus(e.target)}
+            onInput={e => this.handleInput(e.target)}
+          />
+          {this.state.openList.region ? (
+            <ListGroup className='select'>
+              <Lies 
+                names={this.state.regions}
+                onClick={this.clickOnRegion}
+                sumOf={this.props.sumOf.region}
+                content={this.props.content.regions}
+              />
+            </ListGroup>
+          ) : (null)}             
+        </div>
+        <div className='position-relative'>
+          <ResetBtn open={resetBtns.city} handleClick={this.resetValue} />
+          <Input 
+            name='city' 
+            type='text' 
+            tabIndex='-1'
+            autoComplete="off"
+            placeholder={this.props.common.city}
+            onMouseOver={this.mouseOver} 
+            onFocus={e => this.focus(e.target)}
+            onInput={e => this.handleInput(e.target)}
+          />
+          {this.state.openList.city ? (
+            <ListGroup className='select'>
+              {resetBtns.region ? (
+                <FilteredLiesWithParent 
+                  names={this.state.regions_cities}
+                  onClick={this.clickOnCity}
+                  sumOf={this.props.filteredSumOfByRegion.city}
+                  content={this.props.content.cities}
+                  listName='city'
+                />
+              ) : (
+                <LiesWithParent 
+                  names={this.state.regions_cities}
+                  onClick={this.clickOnCity}
+                  sumOf={this.props.sumOf.city}
+                  content={this.props.content.cities}
+                  listName='city'
+                />
               )}
             </ListGroup>
-          </div>
-          <div className='position-relative'>
-            {this.state.resetBtns.city ? <CleareBtn /> : null}
-            <Input 
-              name='city' 
-              type='text' 
-              placeholder={common.city}
-              onMouseOver={e => this.mouseOver(e.target)} 
-              onFocus={e => this.focus(e.target)}
-              onKeyUp={e => this.keyUp(e.target)}
-            />
-            <ListGroup style={{display: 'none'}} className='select'>
-              {this.state.regions_cities.map(region_city => 
-                <ListGroupItem
-                  key={region_city.city}
-                  className="d-flex justify-content-between"
-                  data-en={region_city.city}
-                  data-region={region_city.region}
-                  onClick={e => this.clickOnCity(e.target)}>
-                  {content.cities[region_city.city]}
-                  <Badges sumOfType={sumOf.city} referer={region_city.city} />
-                </ListGroupItem>  
+          ) : (null)}             
+        </div>
+        <div className='position-relative'>
+          <ResetBtn open={resetBtns.type} handleClick={this.resetValue}/>
+          <Input 
+            name='type' 
+            type='text' 
+            tabIndex='-1'
+            autoComplete="off"
+            placeholder={this.props.common.type}
+            onMouseOver={this.mouseOver} 
+            onFocus={e => this.focus(e.target)}
+            onInput={e => this.handleInput(e.target)}
+          />
+          {this.state.openList.type ? (
+            <ListGroup className='select'>
+              {resetBtns.region || resetBtns.city ? (
+                  <FilteredLies 
+                    names={this.state.types}
+                    onClick={this.clickOnType}
+                    content={this.props.content.types}
+                    sumOf={
+                      resetBtns.city ? 
+                        this.props.filteredSumOfByCity.type : this.props.filteredSumOfByRegion.type 
+                    }
+                  />
+                ) : (
+                  <Lies
+                    names={this.state.types}
+                    onClick={this.clickOnType}
+                    sumOf={this.props.sumOf.type}
+                    content={this.props.content.types}
+                  />
               )}
             </ListGroup>
-          </div>
-          <div className='position-relative'>
-            {this.state.resetBtns.type ? <CleareBtn /> : null}
-            <Input 
-              name='type' 
-              type='text' 
-              placeholder={common.type}
-              onMouseOver={e => this.mouseOver(e.target)} 
-              onFocus={e => this.focus(e.target)}
-              onKeyUp={e => this.keyUp(e.target)}
-            />
-            <ListGroup style={{display: 'none'}} className='select'>
-              {this.state.types.map(type => 
-                <ListGroupItem 
-                  key={type} 
-                  className="d-flex justify-content-between"
-                  data-en={type}
-                  onClick={e => this.clickOnType(e.target)}>
-                  {content.types[type]}
-                  <Badges sumOfType={sumOf.type} referer={type} />
-                </ListGroupItem>
+          ) : (null)}             
+        </div>
+        <div className='position-relative'>
+          <ResetBtn open={resetBtns.subType} handleClick={this.resetValue} />
+          <Input 
+            name='subType' 
+            type='text' 
+            tabIndex='-1'
+            autoComplete="off"
+            placeholder={this.props.common.subType}
+            onMouseOver={this.mouseOver} 
+            onFocus={e => this.focus(e.target)}
+            onInput={e => this.handleInput(e.target)}
+          />
+          {this.state.openList.subType ? (
+            <ListGroup className='select'>
+              {resetBtns.region || resetBtns.city || resetBtns.type ? (
+                <FilteredLiesWithParent 
+                  names={this.state.types_subTypes}
+                  onClick={this.clickOnSubType}
+                  content={this.props.content.subTypes}
+                  listName='subType'
+                  sumOf={
+                    resetBtns.type ?
+                      this.props.filteredSumOfByType.subType : resetBtns.city ? 
+                        this.props.filteredSumOfByCity.subType : this.props.filteredSumOfByRegion.subType
+                  }
+                />
+              ) : (
+                <LiesWithParent 
+                  names={this.state.types_subTypes}
+                  onClick={this.clickOnSubType}
+                  sumOf={this.props.sumOf.subType}
+                  content={this.props.content.subTypes}
+                  listName='subType'
+                />
               )}
             </ListGroup>
-          </div>
-          <div className='position-relative'>
-            {this.state.resetBtns.subType ? <CleareBtn /> : null}
-            <Input 
-              name='subType' 
-              type='text' 
-              placeholder={common.subType}
-              onMouseOver={e => this.mouseOver(e.target)} 
-              onFocus={e => this.focus(e.target)}
-              onKeyUp={e => this.keyUp(e.target)}
-            />
-            <ListGroup style={{display: 'none'}} className='select'>
-              {this.state.types_subTypes.map(type_subType => 
-                <ListGroupItem
-                  key={type_subType.subType}
-                  className="d-flex justify-content-between"
-                  data-en={type_subType.subType}
-                  data-type={type_subType.type}
-                  onClick={e => this.clickOnSubType(e.target)}>
-                  {content.subTypes[type_subType.subType]}
-                  <Badges sumOfType={sumOf.subType} referer={type_subType.subType} />
-                </ListGroupItem>  
-              )}
-            </ListGroup>
-          </div>
+          ) : (null)}             
         </div>
       </div>
     )
   }
+}
+
+const Badges = ({sumOfType}) => {
+  return (
+    <span onClick={e => e.stopPropagation()}>
+      <Badge color="success">{sumOfType.proposal}</Badge>
+      <Badge color="danger">{sumOfType.demand}</Badge>
+    </span>
+  )
+}
+
+const ResetBtn = (props) => {
+  return props.open ? (
+    <span 
+      className='close'
+      onClick={props.handleClick}
+      >
+      &times;
+    </span>
+  ) : null
+}
+
+const Lies = (props) => {
+  return props.names.map(name => 
+    <li 
+      key={name + 'l'} 
+      className="d-flex justify-content-between list-group-item"
+      data-en={name}
+      onClick={props.onClick}>
+      {props.content[name]}
+      <Badges sumOfType={props.sumOf[name]} />
+    </li>
+  )
+}
+
+const LiesWithParent = (props) => {
+  return props.names.map(name => {
+    const n = props.listName;
+    return (
+      <li 
+        key={name[n] + 'lwp'} 
+        className="d-flex justify-content-between list-group-item"
+        data-en={name[n]}
+        onClick={props.onClick}>
+        {props.content[name[n]]}
+        <Badges sumOfType={props.sumOf[name[n]]} />
+      </li>
+    )
+  })
+}
+
+const FilteredLies = (props) => {
+  return props.names.map(name => {
+    const sumOfProposal = props.sumOf.proposals[name];
+    const sumOfDemand = props.sumOf.demands[name];
+    return sumOfProposal || sumOfDemand ? 
+      (
+        <li 
+          key={name + 'fl'} 
+          className="d-flex justify-content-between list-group-item"
+          data-en={name}
+          onClick={props.onClick}>
+          {props.content[name]}
+          <Badges sumOfType={{ 
+              proposal: sumOfProposal || 0,
+              demand: sumOfDemand || 0  }} 
+          />
+        </li>
+      ) : null
+  })
+}
+
+const FilteredLiesWithParent = (props) => {
+  return props.names.map(name => {
+    const n = props.listName;
+    const sumOfProposal = props.sumOf.proposals[name[n]];
+    const sumOfDemand = props.sumOf.demands[name[n]];
+    return sumOfProposal || sumOfDemand ?
+      (
+        <li 
+          key={name[n] + 'flwp'} 
+          className="d-flex justify-content-between list-group-item"
+          data-en={name[n]}
+          onClick={props.onClick}>
+          {props.content[name[n]]}
+          <Badges sumOfType={{ 
+              proposal: sumOfProposal || 0,
+              demand: sumOfDemand || 0  }} 
+          />
+        </li>
+      ) : null
+  })
 }
 
 const mapStateToProps = (state) => {
@@ -365,21 +656,19 @@ const mapStateToProps = (state) => {
     content: state.content.Filter,
     common: state.content.common,
     sumOf: state.sumOf,
-    skip_demand: state.demands.skip,
-    count_demand: state.demands.count,
-    isFetchingGet_demand: state.demands.isFetchingGet,
-    linkToCachedAll_demand: state.demands.linkToCachedAll,
-    skip_proposal: state.proposals.skip,
-    count_proposal: state.proposals.count,
-    isFetchingGet_proposal: state.proposals.isFetchingGet,
-    linkToCachedAll_proposal: state.proposals.linkToCachedAll
+    filteredSumOfByRegion: state.filteredSumOfByRegion,
+    filteredSumOfByCity: state.filteredSumOfByCity,
+    filteredSumOfByType: state.filteredSumOfByType,
+    p: state.proposals.descriptions,
+    d: state.demands.descriptions
   }
 }
 
 export default connect(mapStateToProps, {
-  getSumOfAction, 
   addFilter, 
   deleteFilter,
-  getDemandsAction,
-  getProposalsAction
+  getStatementsAction,
+  regionFiltersSumOfAction,
+  cityFiltersSumOfAction,
+  typeFiltersSumOfAction
 })(Filter);

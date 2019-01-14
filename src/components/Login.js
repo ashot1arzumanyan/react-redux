@@ -4,13 +4,15 @@ import { FormGroup, Label, Input, Form, Button,  } from 'reactstrap'
 
 import loginUser from '../actions/loginUserAction'
 import InputWithJumperLabel from '../helpers/InputWithJumperLabel'
+import ButtonContent from './ButtonContent'
 
 class Login extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
-      email: ''
+      email: '',
+      password: ''
     }
 
     this.handleOnInput = this.handleOnInput.bind(this)
@@ -18,19 +20,6 @@ class Login extends Component {
     this.handleOnBlur = this.handleOnBlur.bind(this)
     this.handleOnFocus = this.handleOnFocus.bind(this)
     this.switchToResetPassword = this.switchToResetPassword.bind(this)
-  }
-
-  componentDidMount() {
-    const { email, isFirstLogin } = this.props.user;
-    if (isFirstLogin) {
-      this.setState({
-        email: email
-      })
-      const emailInput = document.querySelector('input[name="email"]');
-      const passwordInput = document.querySelector('input[name="password"]');
-      emailInput.focus();
-      passwordInput.focus();
-    }
   }
 
   handleOnInput(e) {
@@ -55,33 +44,26 @@ class Login extends Component {
     this.props.history.push('/sendVerificationCode')
   }
 
-  handleSubmit() {
-    const { email, password } = this.state;
-    this.props.loginUser({email: email, password: password}, () => {
-      this.props.history.push('/');
-    })
+  handleSubmit(e) {
+    e.preventDefault();
+    if (!this.props.isFetching) {
+      const { email, password } = this.state;
+      this.props.loginUser({email: email, password: password}, () => {
+        this.props.history.push('/');
+      })
+    }
   }
 
   render() {
 
     const email = 'email'
     const password = 'password'
-    const { common, user: { isFirstLogin } } = this.props
-
-    const AfterVerifingEmail = () => {
-      if (isFirstLogin) {
-        return <div>Դուք հաջողությամբ գրանցվել եք կարող եք մուտք գօրծել համակարգ։</div>
-      }
-      return ''
-    }
+    const { common, content } = this.props
     
     return (
-      <div className='d-flex flex-column align-items-center'>
-
-        <AfterVerifingEmail />
-        
-        <Form className='col-4 mt-4'>
-          <FormGroup className={isFirstLogin ? 'jump' : 'jumperLabel'}>
+      <div className='d-flex flex-column align-items-center'>        
+        <Form className='col-4 mt-5'>
+          <FormGroup className='jumperLabel'>
             <Label for={email}>{common.email}</Label>
             <Input 
               id={email} 
@@ -103,17 +85,23 @@ class Login extends Component {
               onFocus={this.handleOnFocus}
             />
           </FormGroup>
-          <Button
-            color='link'
-            onClick={this.switchToResetPassword}>
-            Forgot password?
-          </Button>
-          <Button
-            color='success'
-            onClick={this.handleSubmit}
-            >
-            Login
-          </Button>
+          <div className='d-flex justify-content-center position-relative mt-4'>
+            <Button
+              type='submit'
+              onClick={this.handleSubmit}
+              >
+              <ButtonContent 
+                isFetching={this.props.isFetching}
+                content={common.login}
+              />
+            </Button>
+            <Button
+              color='link'
+              className='forgot_password'
+              onClick={this.switchToResetPassword}>
+              {content.forgot_password}
+            </Button>
+          </div>
         </Form>
       </div>
     );
@@ -124,8 +112,7 @@ const mapstateToProps = (state) => {
   return {
     common: state.content.common,
     content: state.content.Login,
-    loginUser: state.loginUser,
-    user: state.user
+    isFetching: state.user.isFetching
   }
 }
 

@@ -43,7 +43,5 @@ class switchLangs extends Component {
     )
   }
 }
-
-const connectRegister = connect(null, { getContentByLang })(switchLangs)
-
-export default connectRegister
+ 
+export default connect(null, { getContentByLang })(switchLangs)

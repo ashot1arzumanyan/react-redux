@@ -1,9 +1,12 @@
 import * as types from './constant-types'
+import getSumOfAction from './getSumOfAction'
+import { handleResponse, handleError } from '../helpers/fetchHandlers'
 
 const addNewProposalAction = (data, cb) => {
     return dispatch => {
+        dispatch(addNewProposalStartFetching)
         const access_token = localStorage.getItem('access_token');
-        fetch('/addNewProposal', {
+        fetch('/auth/proposalStatement', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -11,34 +14,23 @@ const addNewProposalAction = (data, cb) => {
                 'Authorization': `Bearer ${access_token}`
             }, 
             body: JSON.stringify(data)})
-            .then((res) => {
-                return res.json();
-            })
+            .then(handleResponse)
             .then((data) => {
-                if(data.ok) {
-                    dispatch(saveProposalSuccess(data.proposal));
-                    return cb()
-                }
-                throw new Error(data.errors || 'Something wrong')
+                dispatch(saveProposalSuccess(data));
+                setTimeout(() => {
+                    dispatch(getSumOfAction())
+                }, 2000);
+                cb()
             })
-            .catch(err => {
-                console.error(err);
-                dispatch(saveProposalFail(err));
+            .catch(res => {
+                dispatch(saveProposalFail);
+                handleError(res, dispatch)
             })
     }
 }
 
-const startAddNewProposalAction = () => {
-    return dispatch => {
-        dispatch(addNewProposalStartFetching())
-    }
-}
-
-
-const addNewProposalStartFetching = () => {
-    return {
-        type: types.SAVE_PROPOSAL_START_FETCHING,
-    }
+const addNewProposalStartFetching = {
+    type: types.SAVE_PROPOSAL_START_FETCHING,
 }
 
 const saveProposalSuccess = proposal => {
@@ -48,11 +40,8 @@ const saveProposalSuccess = proposal => {
     }
 }
 
-const saveProposalFail = err => {
-    return {
-        type: types.SAVE_PROPOSAL_FAIL,
-        payload: err
-    }
+const saveProposalFail = {
+    type: types.SAVE_PROPOSAL_FAIL,
 }
 
-export { startAddNewProposalAction, addNewProposalAction };
+export default addNewProposalAction;

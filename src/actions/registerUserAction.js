@@ -1,7 +1,10 @@
 import * as types from './constant-types'
+import { handleResponse, handleError } from '../helpers/fetchHandlers'
 
 const registerUser = userInfo => {
+    userInfo.lang = localStorage.getItem('lang');
     return dispatch => {
+        dispatch(registerStartFetching)
         fetch('/register', {
             method: 'POST',
             headers: {
@@ -9,20 +12,19 @@ const registerUser = userInfo => {
                 'Content-Type': 'application/json'
             }, 
             body: JSON.stringify(userInfo)})
-            .then((res) => {
-                return res.json();
-            })
+            .then(handleResponse)
             .then((data) => {
-                if(data.ok) {
-                    return dispatch(registerSucces(data.user));
-                }
-                throw new Error(data.errors || 'Something wrong')
+                return dispatch(registerSucces(data.user));
             })
-            .catch(err => {
-                console.error(err);
-                dispatch(registerFail(err));
+            .catch(res => {
+                dispatch(registerFail);
+                handleError(res, dispatch);
             })
     }
+}
+
+const registerStartFetching = {
+    type: types.REGISTER_START_FETCHING
 }
 
 const registerSucces = data => {
@@ -32,11 +34,8 @@ const registerSucces = data => {
     }
 }
 
-const registerFail = err => {
-    return {
-        type: types.REGISTER_FAIL,
-        err
-    }
+const registerFail = {
+    type: types.REGISTER_FAIL
 }
 
 export default registerUser;

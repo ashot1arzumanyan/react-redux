@@ -5,6 +5,7 @@ import EditDelete from '../proposalDemandCommon/EditDelete'
 import getProposalsByIdAction from '../../actions/getProposalsByIdAction'
 import ProposalItem from '../proposal/ProposalItem'
 import deleteProposalAction from '../../actions/deleteProposalAction'
+import LoadingButtonSpiner from '../LoadingButtonSpiner'
 
 class MyStatements extends Component {
  
@@ -16,21 +17,17 @@ class MyStatements extends Component {
   }
 
   componentDidMount() {
-    const _id = this.props.user._id
-    this.props.getProposalsByIdAction(_id)
+    this.props.getProposalsByIdAction()
   }
 
   handleDelete(id) {
-    console.log(id);
     const { history } = this.props
     this.props.deleteProposalAction(id, history)
   }
 
   handleEdit(id) {
     const { history, proposalsById } = this.props
-    console.log(this.props);
     const proposal = proposalsById.filter(d => d._id === id)
-    console.log(proposal[0]);
     history.push({
       pathname: '/editProposal',
       state: proposal[0]
@@ -38,25 +35,29 @@ class MyStatements extends Component {
   }
 
   render() {
-    
-    const { proposalsById } = this.props
-    
+        
     return (
       <Fragment>
-        { proposalsById.map((proposal, i) =>
+        { this.props.proposalsById.map((proposal) =>
           <div 
             className='position-relative Proposal mb-5 mt-3'
             data-id={proposal._id}
-            key={i}>
+            key={proposal._id}>
             <EditDelete 
               delete={this.handleDelete}
               edit={this.handleEdit}
             />
             <ProposalItem
-              proposal={proposal}            
+              proposal={proposal}  
+              common={this.props.common}          
             />
           </div>
         )}         
+        {this.props.isFetching ? (
+          <div className='position-relative mt-3'>
+            <LoadingButtonSpiner />
+          </div>
+        ) : null}
       </Fragment>
     )
   }
@@ -64,8 +65,9 @@ class MyStatements extends Component {
 
 const mapstateToProps = (state) => {
   return {
-    user: state.user,
     proposalsById: state.proposalsById.proposalsById,
+    isFetching: state.proposalsById.isFetching,
+    common: state.content.common
   }
 }
 

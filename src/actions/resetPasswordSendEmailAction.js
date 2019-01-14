@@ -1,52 +1,40 @@
 import * as types from './constant-types'
+import { handleResponseWithoutData, handleError } from '../helpers/fetchHandlers'
 
-const resetPasswordSendEmail = (email) => {
+const resetPasswordSendEmail = (data) => {
+    data.lang = localStorage.getItem('lang');
     return dispatch => {
+        dispatch(sendEmailStartFetching);
         fetch('/resetPasswordSendEmail', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             }, 
-            body: JSON.stringify(email)
-        }).then(res => {
-            return res.json()
-        }).then(data => {
-            if (data.ok) {
-                dispatch(sendEmailSuccess())
-                return
-            }
-            throw new Error(data.errors || 'something wrong')
-        }).catch(err => {
-            console.error(err);
-            dispatch(sendEmailFail(err))
+            body: JSON.stringify(data)
+        })
+        .then(handleResponseWithoutData)
+        .then(() => {
+            dispatch(sendEmailSuccess)
+        })
+        .catch(res => {
+            dispatch(sendEmailFail)
+            handleError(res, dispatch)
         })
     }
 }
 
-const startSendEmail = () => {
-    return dispatch => {
-        dispatch(sendEmailStartFetching())
-    }
+const sendEmailStartFetching = {
+    type: types.RESET_PASSWORD_SEND_EMAIL_START_FETCHING
 }
 
-const sendEmailStartFetching = () => {
-    return {
-        type: types.RESET_PASSWORD_SEND_EMAIL_START_FETCHING
-    }
+const sendEmailSuccess = {
+    type: types.RESET_PASSWORD_SEND_EMAIL_SUCCESS
 }
 
-const sendEmailSuccess = () => {
-    return {
-        type: types.RESET_PASSWORD_SEND_EMAIL_SUCCESS
-    }
+const sendEmailFail = {
+    type: types.RESET_PASSWORD_SEND_EMAIL_FAIL,
 }
 
-const sendEmailFail = (err) => {
-    return {
-        type: types.RESET_PASSWORD_SEND_EMAIL_FAIL,
-        payload: err
-    }
-}
 
-export { startSendEmail, resetPasswordSendEmail }
+export default resetPasswordSendEmail;

@@ -8,14 +8,8 @@ const Protected = (Component) => {
 
     render() {
 
-      const { isFetching, isLoggedIn } = this.props.user
-
-      if (isFetching) {
-        return <div>Loading...</div>
-      }
-
       return (
-        isLoggedIn ? (
+        this.props.isLoggedIn ? (
           <Component {...this.props} />
         ) : (
           <Redirect to='login' />
@@ -26,7 +20,7 @@ const Protected = (Component) => {
    
   const mapStateToProps = (state) => {
     return {
-      user: state.user,
+      isLoggedIn: state.user.isLoggedIn,
     }  
   }
   return connect(mapStateToProps)(Auth)                                                                                                        

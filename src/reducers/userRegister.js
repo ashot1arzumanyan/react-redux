@@ -5,22 +5,26 @@ const initialState = {
     confirmationMsgSent: false,
     email: '',
     username: '',
-    errors: []
 }
 
 const userRegister = (state = initialState, action) => {
     switch (action.type) {
+        case types.REGISTER_START_FETCHING:
+            return {
+                ...state,
+                isFetching: true
+            }
         case types.REGISTER_SUCCESS:
             return {
                 ...state,
                 ...action.payload,
                 confirmationMsgSent: true,
-                errors: []
+                isFetching: false
             }
         case types.REGISTER_FAIL:
             return {
                 ...state,
-                ...action.err
+                isFetching: false
             }
         default:
             return state

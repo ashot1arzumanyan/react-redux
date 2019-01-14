@@ -1,7 +1,8 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
+import { connect } from 'react-redux'
 import { Modal, ModalBody, ModalFooter, Button } from 'reactstrap'
 
-class EditDelete extends Component {
+class EditDelete extends PureComponent {
 
   constructor(props) {
     super(props)
@@ -46,17 +47,19 @@ class EditDelete extends Component {
         className='d-flex justify-content-around position-absolute mb-2' 
         style={{top: '-30px', right: '24px', width: '70px'}}>
         <div>
-          <a
+          <span
+            className='cursor-pointer'
             onClick={this.editStatement}>
             <img 
               src={require('./images/edit.svg')} 
               height='24'
               alt='Edit'
             />
-          </a>
+          </span>
         </div>
         <div>
-          <a
+          <span
+            className='cursor-pointer'
             onClick={(e) => {
               this.toggle()
               this.setId(e)
@@ -66,22 +69,21 @@ class EditDelete extends Component {
               height='24'
               alt='Delete'
             />
-          </a>
+          </span>
           <Modal isOpen={this.state.modal} toggle={this.toggle}>
-            {/* <ModalHeader toggle={this.toggle}>Modal title</ModalHeader> */}
             <ModalBody>
-              Do you want to delete?
+              {this.props.common.ask_to_delete}
             </ModalBody>
             <ModalFooter>
               <Button 
-                color="primary" 
+                color="warning" 
                 onClick={e => {
                   this.toggle()
                   this.deleteStatement()
                 }}>
-                Delete
+                {this.props.common.delete}
               </Button>{' '}
-              <Button color="secondary" onClick={this.toggle}>Cancel</Button>
+              <Button color="secondary" onClick={this.toggle}>{this.props.common.cancel}</Button>
             </ModalFooter>
           </Modal>
         </div>
@@ -90,4 +92,10 @@ class EditDelete extends Component {
   }
 }
 
-export default EditDelete
+const mapStateToProps = (state) => {
+  return {
+    common: state.content.common
+  }
+}
+
+export default connect(mapStateToProps)(EditDelete)

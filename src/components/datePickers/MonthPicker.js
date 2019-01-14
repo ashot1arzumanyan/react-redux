@@ -4,6 +4,7 @@ import moment from 'moment'
 import { FormGroup, Label, Input, ListGroup, ListGroupItem, FormFeedback } from 'reactstrap'
 
 import InputWithJumperLabel from '../../helpers/InputWithJumperLabel'
+import DropdownInputWithJumperLabelFocus from '../../helpers/DropdownInputWithJumperLabelFocus'
 
 class MonthPicker extends Component {
 
@@ -11,13 +12,29 @@ class MonthPicker extends Component {
     super(props)
     this.list = []
     this.state = {
-      list: []
+      list: [],
+      isListOpen: false,
+      isInputHasValue: false
     }
+
+    this.DropdownInputWithJumperLabelFocus = DropdownInputWithJumperLabelFocus.bind(this)
   }
 
   componentDidMount() {
     this.list = moment().localeData().months()
     this.setState({ list: this.list })
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.year === new Date().getFullYear().toString()) {
+      this.setState({
+        list: this.list.slice(new Date().getMonth())
+      })
+    } else {
+      if (this.state.list.length < 12) {
+        this.setState({ list: this.list })
+      }
+    }
   }
 
   onInputFilterList(e) {
@@ -27,7 +44,7 @@ class MonthPicker extends Component {
     let lowerCase = ''
     const matchedList = this.list.filter((m, i) => {
       lowerCase = m.toLowerCase()
-      if(execution && lowerCase === value || String(i + 1) === value) {
+      if(execution && (lowerCase === value || String(i + 1) === value)) {
         execution = false
         this.props.commonProps.setNameValue(name, i + 1)
       }
@@ -39,16 +56,23 @@ class MonthPicker extends Component {
   }
 
   render() {
-    const { common, commonProps: { onFocus, onBlur, onInput, onClick, isBlurred, isInvalidMsg } } = this.props
+    const { common, warningMsgs, commonProps: { onBlur, onInput, onClick, isBlurred, isInvalidMsg } } = this.props
+    const { isListOpen, isInputHasValue } = this.state
 
     return ( 
       <FormGroup className='jumperLabel mr-5'>
-        <Label for='month'>{common.month}</Label>
+        <Label 
+          for='month'
+          className={isInputHasValue ? 'jump' : 'jumpCancel'}>
+          {common.month}
+        </Label>
         <Input 
           id='month'
           type="text" 
           name="month"
-          onFocus={onFocus}
+          tabIndex='-1'
+          autoComplete="off"
+          onFocus={this.DropdownInputWithJumperLabelFocus}
           onInput={e => {
               onInput(e)
               this.onInputFilterList(e)
@@ -58,17 +82,19 @@ class MonthPicker extends Component {
           valid = { isBlurred.month && isInvalidMsg.month === '' }
           invalid = { isBlurred.month && isInvalidMsg.month !== '' }
         />
-        <FormFeedback>{ isInvalidMsg.month }</FormFeedback>
-        <ListGroup className='d-none select'>
-          {this.state.list.map((month, i) => 
-            <ListGroupItem 
-              key={i} 
-              data-en={i+1}
-              onClick={onClick}>
-              {month}
-            </ListGroupItem>
-          )}
-        </ListGroup>
+        <FormFeedback>{ warningMsgs[isInvalidMsg.month] }</FormFeedback>
+        {isListOpen ? (
+          <ListGroup className='select'>
+            {this.state.list.map((month, i) => 
+              <ListGroupItem 
+                key={i} 
+                data-en={i+1}
+                onClick={onClick}>
+                {month}
+              </ListGroupItem>
+            )}
+          </ListGroup>
+        ) : (null)}
       </FormGroup>
     )
   }
@@ -77,6 +103,7 @@ class MonthPicker extends Component {
 const mapStateToProps = (state) => {
   return {
     common: state.content.common,
+    warningMsgs: state.content.warningMsgs
   }
 }
 

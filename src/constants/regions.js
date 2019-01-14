@@ -11,4 +11,4 @@ const regions = [
     'tavush',
     'vayoc_cor',
 ];
-export default regions;
+module.exports = regions;

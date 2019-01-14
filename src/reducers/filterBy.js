@@ -17,7 +17,7 @@ const filterBy = (state = initialState, action) => {
                 ...state,
                 [action.payload]: null
             }
-        case 'RESET_FILTERS':
+        case 'RESET_FILTERS': 
             return {
                 ...state,
                 ...initialState

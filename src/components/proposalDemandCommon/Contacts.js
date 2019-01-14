@@ -1,17 +1,16 @@
-import React, { Component, Fragment } from 'react'
-import { connect } from 'react-redux'
+import React, { PureComponent, Fragment } from 'react'
 
-class Contacts extends Component {
+class Contacts extends PureComponent {
   
   render () {
 
-    const { common, email, phone, yourName } = this.props
+    const { common, email, phone, username } = this.props
 
     return (
       <div className='Contacts'>
         <div className='d-flex justify-content-around'>
           <div className='d-flex flex-column justify-content-between align-items-center'>
-            <span>{yourName}</span>
+            <span>{username}</span>
             <small className='text-muted'>{common.username}</small>
           </div>
           {email ? (
@@ -39,10 +38,4 @@ class Contacts extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return{
-    common : state.content.common,
-  }
-}
-
-export default connect(mapStateToProps)(Contacts)
+export default Contacts

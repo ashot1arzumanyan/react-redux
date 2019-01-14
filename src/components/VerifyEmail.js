@@ -1,35 +1,27 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-import setUserEmailAction from '../actions/setUserEmailAction'
+import verifyEmailAction from '../actions/verifyEmailAction'
+import LoadingButtonSpiner from './LoadingButtonSpiner'
 
 class VerifyEmail extends Component {
 
   componentDidMount() {
-    const { location } = this.props; 
+    const { location, history } = this.props; 
     const searchParams = location.search;
     const url = location.pathname + (searchParams !== 'undefined' ? searchParams : '');
-    fetch(url)
-      .then(res => {
-        return res.json()
-      })
-      .then(data => {
-        if (data.ok) {
-          this.props.setUserEmailAction(data.user.email, () => {
-            this.props.history.push('/login');
-          })
-        }
-      })
-      .catch(err => {
-        console.error(err);
-      })
+    this.props.verifyEmailAction(url, () => {
+      history.push('/')
+    })
   }
 
   render() {
     return (
-      <div>VerifyEmail</div>
+      <div className='position-relative'>
+        <LoadingButtonSpiner />
+      </div>
     )
   }
 }
 
-export default connect(null, { setUserEmailAction })(VerifyEmail)
+export default connect(null, { verifyEmailAction })(VerifyEmail)

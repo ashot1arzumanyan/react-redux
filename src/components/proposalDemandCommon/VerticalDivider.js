@@ -1,6 +1,6 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 
-class VerticalDivider extends Component {
+class VerticalDivider extends PureComponent {
   render() {
 
     const className = 'className' in this.props ? this.props.className : ''

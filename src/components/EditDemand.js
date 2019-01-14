@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-import { startEditDemandAction, editDemandAction} from '../actions/editDemandAction'
+import editDemandAction from '../actions/editDemandAction'
 import AddNewEditDemand from './AddNewEditDemand'
 
 class EditDemand extends Component {
@@ -13,21 +13,16 @@ class EditDemand extends Component {
   }
 
   handleSubmit(demand) {
-    const { startEditDemandAction, editDemandAction, history } = this.props
-    startEditDemandAction()
-    editDemandAction(demand, () => {
-      history.push('/')
+    this.props.editDemandAction(demand, () => {
+      this.props.history.push('/')
     })
   }
   
   render() {
 
-    // const { isFetchingAddNew } = this.props
-
     return (
       <AddNewEditDemand 
         editMode={true}
-        // isFetching={isFetchingAddNew}
         demand={this.props.location.state}
         submit={this.handleSubmit}
       />
@@ -36,11 +31,4 @@ class EditDemand extends Component {
 
 }
 
-const mapStateToProps = (state) => {
-  return{
-    startEditDemandAction: state.startEditDemandAction,
-    editDemandAction: state.editDemandAction
-  }
-}
-
-export default connect(mapStateToProps, { startEditDemandAction, editDemandAction })(EditDemand)
+export default connect(null, { editDemandAction })(EditDemand)

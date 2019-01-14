@@ -5,6 +5,8 @@ import { Form, Button } from 'reactstrap'
 import InputWithJumperLabel from '../helpers/InputWithJumperLabel'
 import InputLabel from './inputs/InputLabel'
 import resetPassword from '../actions/resetPasswordAction'
+import ButtonContent from './ButtonContent'
+import { validate, validateAll, Validator } from '../helpers/Validator'
 
 class ResetPassword extends Component {
 
@@ -29,6 +31,9 @@ class ResetPassword extends Component {
     this.handleOnBlur = this.handleOnBlur.bind(this)
     this.handleOnFocus = this.handleOnFocus.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
+    this.validate = validate.bind(this)
+    this.validateAll = validateAll.bind(this)
+    this.Validator = Object.create(Validator.prototype)
   }
 
   componentDidMount() {
@@ -77,7 +82,7 @@ class ResetPassword extends Component {
   handleSubmit(e) {
     e.preventDefault();
     const hasInvalidMsg = this.validateAll()
-    if (!hasInvalidMsg) {
+    if (!hasInvalidMsg && !this.props.isFetching) {
       const { email, key, password, repeat_password } = this.state
       this.props.resetPassword(
         {
@@ -86,7 +91,7 @@ class ResetPassword extends Component {
           password: password,
           repeat_password: repeat_password
         }, 
-        this.props.history.push('/')
+        () => this.props.history.push('/')
       )
     }
   }
@@ -117,45 +122,19 @@ class ResetPassword extends Component {
             type='password'
             commonProps={commonProps}
           />
-          <Button
-            onClick={this.handleSubmit}
-            >
-            Change password
-          </Button>
+          <div className='d-flex justify-content-center position-relative mt-4'>
+            <Button
+              onClick={this.handleSubmit}
+              >
+              <ButtonContent 
+                isFetching={this.props.isFetching}
+                content={common.change_password}
+              />
+            </Button>
+          </div>
         </Form>
       </div>
     ) 
-  }
-  
-  validateAll() {
-    const isBlurred = { ...this.state.isBlurred }
-    let entries = []
-    let input
-    const names = Object.keys(isBlurred)
-    names.forEach(name => {
-      isBlurred[name] = true 
-      input = document.getElementById(name)
-      entries.push({ name: name, value: input.value })
-    })
-    const isInvalidMsg = this.msgCreator(entries)
-    this.setState({
-      isBlurred: isBlurred,
-      isInvalidMsg: isInvalidMsg
-    })
-    let hasInvalidMsg = false
-    names.forEach(name => {
-      if (!hasInvalidMsg && isInvalidMsg[name] !== '') {
-        hasInvalidMsg = true
-      }
-    })
-    return hasInvalidMsg
-  }
-
-  validate(name, value) {
-    const isInvalidMsg = this.msgCreator([{ name: name, value: value.trim() }])
-    this.setState({
-      isInvalidMsg: isInvalidMsg
-    })
   }
 
   msgCreator(entries = []) {
@@ -168,42 +147,22 @@ class ResetPassword extends Component {
       isInvalidMsg[name] = ''
       switch (name) {
 
-          case 'password':
-          const repeat_password = document.querySelector('input[name = "repeat_password"]');
-          if (value === '') {
-            isInvalidMsg[name] = 'Password should not be empty and most be at least 7 characters'
-            break;
-          }
-          if (value.length < 7) {
-            isInvalidMsg[name] = 'Password most be at least 7 characters'
-            break;
-          }
-          if (value !== repeat_password.value.trim()) {
-            isInvalidMsg[name] = 'Passwords not matched';
-            isInvalidMsg[repeat_password.name] = 'Passwords not matched';
-            break;
-          } else {
-            isInvalidMsg[repeat_password.name] = '';
-          }
+        case 'password':
+          const { 
+            passwordMsg, 
+            repeat_passwordMsg } = this.Validator.checkPassword(value, isInvalidMsg.repeat_password);
+          isInvalidMsg[name] = passwordMsg;
+          isInvalidMsg.repeat_password = repeat_passwordMsg;
           break;
-          
         case 'repeat_password':
-          const password = document.querySelector('input[name = "password"]');
-          if (value === '') {
-            isInvalidMsg[name] = 'Password should not be empty and most be at least 7 characters'
-            break;
-          }
-          if (value.length < 7) {
-            isInvalidMsg[name] = 'Password most be at least 7 characters'
-            break;
-          }
-          if (value !== password.value.trim()) {
-            isInvalidMsg[name] = 'Passwords not matched';
-            isInvalidMsg[password.name] = 'Passwords not matched';
-            break;
-          } else {
-            isInvalidMsg[password.name] = '';
-          }
+          const { 
+            passwordMsg_2,
+            repeat_passwordMsg_2 } = this.Validator.checkRepeatPassword(value, isInvalidMsg.password);
+          isInvalidMsg[name] = repeat_passwordMsg_2;
+          isInvalidMsg.password = passwordMsg_2;
+          break
+        default:
+          break;
       }
     })
     
@@ -214,6 +173,7 @@ class ResetPassword extends Component {
 const mapstateToProps = (state) => {
   return {
     common: state.content.common,
+    isFetching: state.isFetchings.isFetching
   }
 }
 

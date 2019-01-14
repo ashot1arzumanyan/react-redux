@@ -1,10 +1,9 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
+import React, { PureComponent } from 'react'
 import moment from 'moment'
 
 import QuantityMiddleDemandItem from './QuantityMiddleDemandItem'
 
-class MarkDateMiddleDemandItem extends Component {
+class MarkDateMiddleDemandItem extends PureComponent {
   render() {
 
     const { common, year, month, day, quantity } = this.props
@@ -37,10 +36,4 @@ class MarkDateMiddleDemandItem extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return{
-    common : state.content.common,
-  }
-}
-
-export default connect(mapStateToProps)(MarkDateMiddleDemandItem)
+export default MarkDateMiddleDemandItem

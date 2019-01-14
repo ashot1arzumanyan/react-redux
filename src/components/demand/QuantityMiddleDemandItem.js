@@ -1,25 +1,16 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
+import React, { PureComponent } from 'react'
 
-class QuantityMiddleDemandItem extends Component {
+class QuantityMiddleDemandItem extends PureComponent {
 
   render() {
 
-    const { content, quantity } = this.props
-
     return (
       <div className='d-flex flex-column justify-content-between align-items-center'>
-        <span>{quantity}</span>
-        <small className='text-muted'>{content}</small>
+        <span>{this.props.quantity}</span>
+        <small className='text-muted'>{this.props.content}</small>
       </div>
     )
   }
 }
 
-const mapStateToProps = (state) => {
-  return{
-    content: state.content.common.quantity
-  }
-}
-
-export default connect(mapStateToProps)(QuantityMiddleDemandItem)
+export default QuantityMiddleDemandItem

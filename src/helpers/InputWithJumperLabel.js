@@ -1,25 +1,28 @@
 class InputWithJumperLabel {
     constructor(e) {
         this.target = e.target
+        this.label = this.target.previousElementSibling
+        setTimeout(() => {
+            this.label.style.color = window.getComputedStyle(this.target).borderColor;
+        }, 200);
     }
     
     focus() {
-        const parent = this.target.parentElement
-        parent.classList.add('jump')
-        parent.classList.remove('jumpCancel')
+        this.label.classList.add('jump')
+        this.label.classList.remove('jumpCancel')
+        // setTimeout(() => {
+        //     this.label.style.color = '#495057';
+        // }, 200);
     }
 
     blur() {
-        const parent = this.target.parentElement
         if(!this.target.value) {
-            parent.classList.remove('jump')
-            parent.classList.add('jumpCancel')
+            this.label.classList.remove('jump')
+            this.label.classList.add('jumpCancel')
+            // setTimeout(() => {
+            //     this.label.style.color = window.getComputedStyle(this.target).borderColor;
+            // }, 200);
         }
-    }
-
-    checkListIsClosed() {
-        const ul = this.target.parentElement.querySelector('ul')
-        return ul.classList.contains('d-none')
     }
 
     getName() {
@@ -28,6 +31,10 @@ class InputWithJumperLabel {
 
     getValue() {
         return this.target.value
+    }
+
+    setValue(value) {
+        this.target.value = value
     }
 
     getNameValue() {

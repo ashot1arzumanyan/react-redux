@@ -1,25 +1,38 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
 
-class HeaderProposalDemandItem extends Component {
+import DramSign from './images/dram-my.jsx'
+
+const DescriptionOneWord = (props) => {
+  if (!props.description_one_word) {
+    return null
+  }
+  return (
+    <small className='text-muted ml-4'>
+      {props.description_one_word}
+    </small>
+  )
+}
+
+class HeaderProposalDemandItem extends React.PureComponent {
 
   render() {
 
-    const { common, cFF, subType, unit, price } = this.props
+    const { subType, unit, price, description_one_word } = this.props
 
     return (
       <div className='d-flex justify-content-between'>
-        <span>{cFF.subTypes[subType]}</span>
         <span>
+          {this.props.subTypes[subType]}
+          <DescriptionOneWord description_one_word={description_one_word}/>
+        </span>
+        <span className='price-container'>
           <small 
             className='text-muted'>
-            1 {common.units[unit]} 
+            1 {this.props.units[unit]} 
           </small>
-          {` ${price}  `}
-          <img 
-            alt='AMD'
-            src={require('./images/armenian_dram_sign.svg')}
-          />
+          {` ${price}`}
+          <DramSign />
         </span>
       </div>
     )
@@ -28,8 +41,8 @@ class HeaderProposalDemandItem extends Component {
 
 const mapStateToProps = (state) => {
   return{
-    cFF: state.content.Filter,
-    common : state.content.common
+    subTypes: state.content.Filter.subTypes,
+    units : state.content.Filter.units
   }
 }
 

@@ -1,15 +1,15 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 
-class CityMiddleProposalDeamndItem extends Component {
+class CityMiddleProposalDeamndItem extends PureComponent {
 
   render() {
 
-    const { common, cFF, city } = this.props
+    const { common, city } = this.props
 
     return (
       <div className='d-flex flex-column justify-content-between align-items-center'>
-        <span>{cFF.cities[city]}</span>
+        <span>{this.props.cities[city]}</span>
         <small className='text-muted'>{common.city}</small>
       </div>
     )
@@ -19,7 +19,7 @@ class CityMiddleProposalDeamndItem extends Component {
 const mapStateToProps = (state) => {
   return{
     common : state.content.common,
-    cFF: state.content.Filter,
+    cities: state.content.Filter.cities,
   }
 }
 

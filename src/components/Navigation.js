@@ -1,8 +1,7 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 import { Router, Route, Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { createBrowserHistory } from 'history'
-import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap'
 
 import Login from './Login'
 import Register from './Register'
@@ -16,28 +15,27 @@ import VerifyEmail from './VerifyEmail'
 import SendVerificationCode from './SendVerificationCode'
 import ResetPassword from './ResetPassword'
 import MyStatements from './MyStatements'
+import Settings from './Settings'
+import NavigationDropdownItem from './NavigationDropdownItem'
+import WarningAlertFromServer from './WarningAlertFromServer'
+import Logo from './logo'
 
 import Protected from './Protected'
 import logoutAction from '../actions/logoutAction'
 
-const history = createBrowserHistory(); 
+export const history = createBrowserHistory(); 
 
-class Navigation extends Component {
+class Navigation extends PureComponent {
 
   constructor(props) {
-    super(props) 
-    
+    super(props)
+
     this.logout = this.logout.bind(this)
   }
 
-  componentWillMount() {
-    const body = document.querySelector('body');
-    body.className = 'light'
-  }
-
-  toggleMode(e) {
-    const body = document.querySelector('body');
-    body.className = e.target.innerText.toLowerCase();
+  componentDidMount() {
+    const mode = localStorage.getItem('mode');
+    document.querySelector('body').className = mode ? mode : 'light';
   }
 
   logout() {
@@ -45,20 +43,26 @@ class Navigation extends Component {
       history.push('/');
     });
   }
- 
+
+  toggleMode(e) {
+    const mode = e.target.innerText.toLowerCase();
+    document.querySelector('body').className = mode;
+    localStorage.setItem('mode', mode)
+  }
+
   render() {
 
     const { content, user: { username } } = this.props
 
     return (
       <Router history={history}>
-        <div>
-          <ul className="nav justify-content-between">
+        <nav>
+          <ul className="Navigation d-flex justify-content-between position-relative">
             <li className="nav-item">
               <Link 
                 className='nav-link'
                 to="/">
-                home
+                <Logo />
               </Link>
             </li>
             <li>
@@ -99,42 +103,31 @@ class Navigation extends Component {
                 </ul>
               </li>
             ) : (
-              <UncontrolledDropdown nav inNavbar>
-                <DropdownToggle nav caret>
-                  {username}
-                </DropdownToggle>
-                <DropdownMenu right>
-                  <Link
-                    className='dropdown-item'
-                    to='/myStatements'>
-                    My statements
-                  </Link>
-                  <DropdownItem>
-                    Settings
-                  </DropdownItem>
-                  <DropdownItem divider />
-                  <DropdownItem onClick={this.logout}>
-                    logout
-                  </DropdownItem>
-                </DropdownMenu>
-              </UncontrolledDropdown>
+              <NavigationDropdownItem 
+                handleLogout={this.logout}
+                history={history}
+                username={username}
+                my_statements={content.my_statements}
+                settings={content.settings}
+                logout={content.logout}
+              />
             )}
 
             <li className='light-dark'>
               <ul className='d-flex justify-content-between'>
                 <li className="nav-item">
-                  <a 
-                    className='nav-link'
+                  <span 
+                    className='nav-link cursor-pointer'
                     onClick={this.toggleMode}>
                     Light
-                  </a>
+                  </span>
                 </li>
                 <li className="nav-item">
-                  <a 
-                    className='nav-link'
+                  <span 
+                    className='nav-link cursor-pointer'
                     onClick={this.toggleMode}>
                     Dark
-                  </a>
+                  </span>
                 </li>
               </ul>
             </li>
@@ -154,8 +147,10 @@ class Navigation extends Component {
           <Route path='/sendVerificationCode' component={SendVerificationCode} />
           <Route path='/resetPassword' component={ResetPassword} />          
           <Route path='/myStatements' component={Protected(MyStatements)} />
+          <Route path='/settings' component={Protected(Settings)} />
 
-        </div>
+          <WarningAlertFromServer />
+        </nav>
       </Router>
     )
   }

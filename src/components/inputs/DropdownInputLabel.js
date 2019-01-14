@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { FormGroup, Label, Input, FormFeedback, ListGroup, ListGroupItem } from 'reactstrap'
 
 import InputWithJumperLabel from '../../helpers/InputWithJumperLabel'
+import DropdownInputWithJumperLabelFocus from '../../helpers/DropdownInputWithJumperLabelFocus'
 
 class DropdownInputLabel extends Component {
 
@@ -10,10 +11,13 @@ class DropdownInputLabel extends Component {
     super(props)
     this.list = []
     this.state = {
-      list: []
+      list: [],
+      isListOpen: false,
+      isInputHasValue: false
     }
 
     this.onInputFilterList = this.onInputFilterList.bind(this)
+    this.DropdownInputWithJumperLabelFocus = DropdownInputWithJumperLabelFocus.bind(this)
   }
 
   componentDidMount() {
@@ -25,7 +29,7 @@ class DropdownInputLabel extends Component {
     const input = new InputWithJumperLabel(e)
     const { name, value } = input.getNameValue()
     const nameS = `${name}s`
-    const content = this.props.common[nameS]
+    const content = this.props.cFF[nameS]
     let execution = true
     let lowerCase = ''
     const matchedList = this.list.filter(m => {
@@ -43,16 +47,23 @@ class DropdownInputLabel extends Component {
    
   render() {
 
-    const { common, name, type, listName, commonProps: { onInput, onBlur, onFocus, onClick, isBlurred, isInvalidMsg } } = this.props
-    
+    const { name, type, listName, commonProps: { onInput, onBlur, onClick, isBlurred, isInvalidMsg } } = this.props
+    const { isListOpen, isInputHasValue } = this.state
+
     return (
       <FormGroup className='jumperLabel'>
-        <Label for={name}>{common[name]}</Label>
+        <Label 
+          for={name}
+          className={isInputHasValue ? 'jump' : 'jumpCancel'}>
+          {this.props.common[name]}
+        </Label>
         <Input 
           id={name}
           type={type}
           name={name}
-          onFocus={onFocus}
+          tabIndex='-1'
+          autoComplete="off"
+          onFocus={this.DropdownInputWithJumperLabelFocus}
           onInput={e => {
             onInput(e)
             this.onInputFilterList(e)
@@ -61,17 +72,19 @@ class DropdownInputLabel extends Component {
           valid = { isBlurred[name] && isInvalidMsg[name] === '' }
           invalid = { isBlurred[name] && isInvalidMsg[name] !== '' }
         />
-        <FormFeedback>{ isInvalidMsg[name] }</FormFeedback>
-        <ListGroup className='d-none select'>
-          {this.state.list.map(listItem => 
-            <ListGroupItem 
-              key={listItem} 
-              data-en={listItem}
-              onClick={onClick}>
-              {common[listName][listItem]}
-            </ListGroupItem>
-          )}
-        </ListGroup>
+        <FormFeedback>{ this.props.warningMsgs[isInvalidMsg[name]] }</FormFeedback>
+        {isListOpen ? (
+          <ListGroup className='select'>
+            {this.state.list.map(listItem => 
+              <ListGroupItem 
+                key={listItem} 
+                data-en={listItem}
+                onClick={onClick}>
+                {this.props.cFF[listName][listItem]}
+              </ListGroupItem>
+            )}
+          </ListGroup>
+        ) : (null)}
       </FormGroup>
     )
   }
@@ -79,7 +92,9 @@ class DropdownInputLabel extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    cFF: state.content.Filter,
     common: state.content.common,
+    warningMsgs: state.content.warningMsgs
   }
 }
 

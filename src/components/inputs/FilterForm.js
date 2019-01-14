@@ -13,7 +13,7 @@ class FilterForm extends Component {
     const { onFocus, onClick, onBlur, onInput, setNameValue, isBlurred, isInvalidMsg } = this.props
     
     return (
-      <div className='Filter my-4 d-flex justify-content-around'>
+      <div className='FilterForm Filter my-4 d-flex justify-content-around'>
         <DropdownInputLabelWithChildList 
           name='region'
           type='text'

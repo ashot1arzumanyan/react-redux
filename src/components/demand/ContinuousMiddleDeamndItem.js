@@ -1,9 +1,8 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
+import React, { PureComponent } from 'react'
 
 import QuantityMiddleDemandItem from './QuantityMiddleDemandItem'
 
-class ContinuousMiddleDeamndItem extends Component {
+class ContinuousMiddleDeamndItem extends PureComponent {
   render() {
 
     const { common, continuousType, frequencyNum, quantity } = this.props
@@ -51,6 +50,7 @@ class ContinuousMiddleDeamndItem extends Component {
           <div className='d-flex'>
             <QuantityMiddleDemandItem 
               quantity={quantity}
+              content={common.quantity}
             />
             <div className='d-flex align-items-center position-relative' style={{minHeight: '100%'}}>
               <small className='text-muted position-absolute' style={{top: '100%', left: '-100%' }}>{ common.continuous }</small>
@@ -71,10 +71,4 @@ class ContinuousMiddleDeamndItem extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return{
-    common : state.content.common,
-  }
-}
-
-export default connect(mapStateToProps)(ContinuousMiddleDeamndItem)
+export default ContinuousMiddleDeamndItem

@@ -1,22 +1,20 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import moment from 'moment'
 import { Form, FormGroup, Button, Input, Label, Col, Collapse } from 'reactstrap'
 
-import 'react-datepicker/dist/react-datepicker.css'
 import FilterForm from './inputs/FilterForm'
 import ProposalItem from './proposal/ProposalItem'
 import units from '../constants/units'
 import InputWithJumperLabel from '../helpers/InputWithJumperLabel'
-import DropdownInputWithJumperLabel from '../helpers/DropdownInputWithJumperLabel'
 import YearPicker from './datePickers/YearPicker'
 import MonthPicker from './datePickers/MonthPicker'
 import DayPicker from './datePickers/DayPicker'
 import ContinuousDatePicker from './datePickers/ContinuousDatePicker'
-import { startAddNewProposalAction, addNewProposalAction } from '../actions/addNewProposalAction'
 import InputLabel from './inputs/InputLabel'
 import DropdownInputLabel from './inputs/DropdownInputLabel'
 import DropdownListItemWithJumperLabel from '../helpers/DropdownListItemWithJumperLabel'
+import ButtonContent from './ButtonContent'
+import { Validator, validate, validateAll} from '../helpers/Validator'
 
 class AddNewEditProposal extends Component {
 
@@ -28,8 +26,9 @@ class AddNewEditProposal extends Component {
       price: '',
       unit: '',
       available_quantity: '',
-      yourName: '',
+      username: '',
       phone: '',
+      description_one_word: '',
       comment: '',
       plan_to_have_quantity: '',
       plan_to_have_price: '',
@@ -49,7 +48,7 @@ class AddNewEditProposal extends Component {
         price: false,
         unit: false,
         available_quantity: false,
-        yourName: false,
+        username: false,
         email: false,
         phone: false,
         comment: false,
@@ -60,7 +59,7 @@ class AddNewEditProposal extends Component {
         price: '',
         unit: '',
         available_quantity: '',
-        yourName: '',
+        username: '',
         email: '',
         phone: '',
         comment: '',
@@ -71,15 +70,16 @@ class AddNewEditProposal extends Component {
     this.handleFocusOnInput = this.handleFocusOnInput.bind(this)
     this.handleBlurOnInput = this.handleBlurOnInput.bind(this)
     this.handleInputOnInput = this.handleInputOnInput.bind(this)
-    this.handleFocusOnDropdownInput = this.handleFocusOnDropdownInput.bind(this)
     this.handleClickOnDropdownListItem = this.handleClickOnDropdownListItem.bind(this)
     this.handleBlurOnDropdownListItem = this.handleBlurOnDropdownListItem.bind(this)
     this.toggleIsPlanToHave = this.toggleIsPlanToHave.bind(this)
     this.clickOnRadio = this.clickOnRadio.bind(this)
     this.clickOnRadioContinuousType = this.clickOnRadioContinuousType.bind(this)
-    this.validate = this.validate.bind(this)
-    this.setNameValue = this.setNameValue.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
+    this.setNameValue = this.setNameValue.bind(this)
+    this.Validator = new Validator(this.props.cFF)
+    this.validate = validate.bind(this)
+    this.validateAll = validateAll.bind(this)
   }
 
   componentDidMount() {
@@ -89,8 +89,10 @@ class AddNewEditProposal extends Component {
       const price = proposal.price, 
       unit = proposal.unit, 
       available_quantity = proposal.available_quantity, 
+      username = proposal.username,
       email = proposal.email ? proposal.email : '', 
       phone = proposal.phone ? proposal.phone : '', 
+      description_one_word = proposal.description_one_word ? proposal.description_one_word : '',
       comment = proposal.comment ? proposal.comment : '', 
       plan_to_have_quantity = proposal.is_plan_to_have ? proposal.plan_to_have_quantity : '', 
       plan_to_have_price = proposal.is_plan_to_have ? proposal.plan_to_have_price : '', 
@@ -111,8 +113,10 @@ class AddNewEditProposal extends Component {
         price: price, 
         unit: unit, 
         available_quantity: available_quantity, 
+        username: username,
         email: email, 
         phone: phone, 
+        description_one_word: description_one_word,
         comment: comment, 
         year: year, 
         month: month, 
@@ -135,13 +139,13 @@ class AddNewEditProposal extends Component {
 
       const form = document.querySelector('form.add_proposal');
 
-      function doJump(input) {
-        const parent = input.parentElement
-        parent.classList.add('jump')
-        parent.classList.remove('jumpCancel')
+      const doJump = (input) => {
+        const label = input.previousElementSibling
+        label.classList.add('jump')
+        label.classList.remove('jumpCancel')
       }
 
-      function addValuesFor(nameValues = []) {
+      const addValuesFor = (nameValues = []) => {
         nameValues.forEach(nameValu => {
           const input = form.querySelector(`#${nameValu.name}`)
           input.value = [nameValu.value]
@@ -151,10 +155,11 @@ class AddNewEditProposal extends Component {
 
       const nameValues = [
         { name: 'price', value: price },
-        { name: 'available_quantity', value: available_quantity }        
+        { name: 'available_quantity', value: available_quantity },
+        { name: 'username', value: username }       
       ]
 
-      function checkAndAddToNameValues(name, value) {
+      const checkAndAddToNameValues = (name, value) => {
         if (value) {
           nameValues.push( { name: name, value: value } )
         }
@@ -162,6 +167,7 @@ class AddNewEditProposal extends Component {
 
       checkAndAddToNameValues('email', email)
       checkAndAddToNameValues('phone', phone)
+      checkAndAddToNameValues('description_one_word', description_one_word)
       checkAndAddToNameValues('comment', comment)
       checkAndAddToNameValues('year', year)
       checkAndAddToNameValues('month', month)
@@ -192,7 +198,7 @@ class AddNewEditProposal extends Component {
 
       const input = form.querySelector('#unit')
       input.dataset.en = unit
-      input.value = this.props.common.units[unit]
+      input.value = this.props.cFF.units[unit]
       doJump(input)
 
       if (is_plan_to_have) {
@@ -298,6 +304,13 @@ class AddNewEditProposal extends Component {
   handleFocusOnInput(e) {
     const input = new InputWithJumperLabel(e)
     input.focus()
+    const { name, value } = input.getNameValue()
+    if(name === 'username' || name === 'email' || name === 'phone') {
+      if (this.props.user[name] && !value) {
+        this.setNameValue(name, this.props.user[name])
+        input.setValue(this.props.user[name])
+      }
+    }
   }
 
   handleBlurOnInput(e) {
@@ -318,31 +331,22 @@ class AddNewEditProposal extends Component {
     this.setNameValue(name, datasetEn || value)
   }
 
-  handleFocusOnDropdownInput(e) {
-    const input = new DropdownInputWithJumperLabel(e)
-    input.focus()
-  }
-
   handleClickOnDropdownListItem(e) {
     const listItem = new DropdownListItemWithJumperLabel(e)
     listItem.click()
-    const input = listItem.getInput()
-    this.setIsInvalidMsgByNameToEmpty(input.name)
   }
 
   handleBlurOnDropdownListItem(e) {
     const input = new InputWithJumperLabel(e)
-    if (input.checkListIsClosed()) {
-      const { name, value } = input.getNameValue()
-      this.setIsBlurredTrue(name)
-      this.validate(name, value)
-    }
+    const { name, value } = input.getNameValue()
+    this.setIsBlurredTrue(name)
+    this.validate(name, value)
   }
 
   onSubmit(e) {
     e.preventDefault()
     const hasInvalidMsg = this.validateAll()
-    if (!hasInvalidMsg) {
+    if (!hasInvalidMsg && !this.props.isFetchingAddNew) {
       const { isBlurred, isInvalidMsg, ...proposal } = this.state
       this.props.submit(proposal)
     }  
@@ -352,12 +356,6 @@ class AddNewEditProposal extends Component {
     const isBlurred = { ...this.state.isBlurred }
     isBlurred[name] = true
     this.setState({ isBlurred: isBlurred })
-  }
-
-  setIsInvalidMsgByNameToEmpty(name) {
-    const isInvalidMsg = { ...this.state.isInvalidMsg }
-    isInvalidMsg[name] = ''
-    this.setState({ isInvalidMsg: isInvalidMsg })
   }
 
   setNameValue(name, value) {
@@ -380,7 +378,6 @@ class AddNewEditProposal extends Component {
     }
 
     const commonPropsForDropdownInput = {
-      onFocus: this.handleFocusOnDropdownInput,
       onClick: this.handleClickOnDropdownListItem,
       onBlur: this.handleBlurOnDropdownListItem,
       onInput: this.handleInputOnInput,
@@ -392,7 +389,6 @@ class AddNewEditProposal extends Component {
     return (
       <Form className='add_proposal'>
         <FilterForm 
-          onFocus={this.handleFocusOnDropdownInput}
           onClick={this.handleClickOnDropdownListItem}
           onBlur={this.handleBlurOnDropdownListItem}
           onInput={this.handleInputOnInput}
@@ -405,6 +401,8 @@ class AddNewEditProposal extends Component {
             <div className='Proposal proposal_demand_container position-fixed'>
               <ProposalItem 
                 proposal={proposal}
+                common={common}
+                addNewMode={true}
               />              
             </div>
           </div>
@@ -481,9 +479,12 @@ class AddNewEditProposal extends Component {
                   />
                   <MonthPicker 
                     commonProps={commonPropsForDropdownInput}
+                    year={this.state.year}
                   />
                   <DayPicker 
-                    commonProps={commonPropsForDropdownInput}
+                    onBlur={this.handleBlurOnDropdownListItem}
+                    onInput={this.handleInputOnInput}
+                    onClick={this.handleClickOnDropdownListItem}
                     year={this.state.year}
                     month={this.state.month}
                   />
@@ -497,7 +498,7 @@ class AddNewEditProposal extends Component {
                 </FormGroup>
               </Collapse>
               <InputLabel
-                name='yourName' 
+                name='username' 
                 type='text'
                 commonProps={commonPropsForInput}
               />
@@ -512,14 +513,21 @@ class AddNewEditProposal extends Component {
                 commonProps={commonPropsForInput}
               />
               <InputLabel
+                name='description_one_word' 
+                type='text'
+                commonProps={commonPropsForInput}
+              />
+              <InputLabel
                 name='comment' 
                 type='textarea'
                 commonProps={commonPropsForInput}
               />
               <Button 
-                disabled={isFetchingAddNew}
                 onClick={this.onSubmit}>
-                {common.add}
+                <ButtonContent 
+                  isFetching={isFetchingAddNew}
+                  content={common.add}
+                />
               </Button>
             </Col>          
           </div>
@@ -527,37 +535,6 @@ class AddNewEditProposal extends Component {
         
       </Form>
     )
-  }
-
-  validate(name, value) {
-    const isInvalidMsg = this.msgCreator([{ name: name, value: value }])
-    this.setState({
-      isInvalidMsg: isInvalidMsg
-    })
-  }
-
-  validateAll() {
-    const isBlurred = { ...this.state.isBlurred }
-    let entries = []
-    let input
-    const names = Object.keys(isBlurred)
-    names.forEach(name => {
-      isBlurred[name] = true 
-      input = document.getElementById(name)
-      entries.push({ name: name, value: input.value })
-    })
-    const isInvalidMsg = this.msgCreator(entries)
-    this.setState({
-      isBlurred: isBlurred,
-      isInvalidMsg: isInvalidMsg
-    })
-    let hasInvalidMsg = false
-    names.forEach(name => {
-      if (!hasInvalidMsg && isInvalidMsg[name] !== '') {
-        hasInvalidMsg = true
-      }
-    })
-    return hasInvalidMsg
   }
 
   msgCreator(entries = []) {
@@ -572,229 +549,88 @@ class AddNewEditProposal extends Component {
       value = entry.value.trim().toLowerCase();
       switch (name) {
         case 'city':
-          isInvalidMsg[name] = this.checkCity(value);
+          isInvalidMsg[name] = this.Validator.checkCity(value);
           break;
 
         case 'subType':
-          isInvalidMsg[name] = this.checkSubType(value);
+          isInvalidMsg[name] = this.Validator.checkSubType(value);
           break;
         
         case 'price':
-          isInvalidMsg[name] = this.checkPrice(value);
+          isInvalidMsg[name] = this.Validator.checkIsNotEmpty(value);
           break;
 
         case 'unit':
-          isInvalidMsg[name] = this.checkUnit(value);
+          isInvalidMsg[name] = this.Validator.checkUnit(value);
           break;
 
         case 'available_quantity':
-          isInvalidMsg[name] = this.checkAvailableQuantity(value);
+          isInvalidMsg[name] = this.Validator.checkIsNotEmpty(value);
           break;
 
-        case 'yourName':
-          isInvalidMsg[name] = this.checkYourName(value);
+        case 'username':
+          isInvalidMsg[name] = this.Validator.checkUsername(value);
           break;
   
         case 'email':
           const phone = document.querySelector('input[name="phone"]');
-          emailMsg = this.checkEmail(value);
-          phoneMsg = this.checkPhone(phone.value);
+          emailMsg = this.Validator.checkEmail(value);
+          phoneMsg = this.Validator.checkIsNotEmpty(phone.value);
           if (emailMsg === '' || phoneMsg === '') {
             isInvalidMsg.phone = '';
             isInvalidMsg[name] = '';
           } else {
             isInvalidMsg[name] = emailMsg;
             isBlurred.phone = true;
-            isInvalidMsg.phone = 'Phone or Email should not be empty';
+            isInvalidMsg.phone = 'email_or_phone_not_empty';
           }
           break;
 
         case 'phone':
           const email = document.querySelector('input[name="email"]');
-          phoneMsg = this.checkPhone(value);
-          emailMsg = this.checkEmail(email.value);
+          phoneMsg = this.Validator.checkIsNotEmpty(value);
+          emailMsg = this.Validator.checkEmail(email.value);
           if (phoneMsg === '' || emailMsg === '') {
             isInvalidMsg[name] = '';
             isInvalidMsg.email = '';
           } else {
             isInvalidMsg[name] = phoneMsg;
-            isInvalidMsg.email = 'Email or Phone should not be empty'
+            isInvalidMsg.email = 'email_or_phone_not_empty'
           }
-
           break;
 
+        case 'description_one_word':
+          isInvalidMsg[name] = this.Validator.checkDescriptionOneWord(value);
+          break;
+        
         case 'comment':
-          isInvalidMsg[name] = this.checkComment(value);
+          isInvalidMsg[name] = this.Validator.checkComment(value);
           break;
         
         case 'plan_to_have_quantity':
-          isInvalidMsg[name] = this.checkQuantity(value);
+          isInvalidMsg[name] = this.Validator.checkIsNotEmpty(value);
           break;
 
         case 'plan_to_have_price':
-          isInvalidMsg[name] = this.checkPrice(value);
+          isInvalidMsg[name] = this.Validator.checkIsNotEmpty(value);
           break;
 
         case 'frequencyNum':
-          isInvalidMsg[name] = this.checkFrequencyNum(value)
+          isInvalidMsg[name] = this.Validator.checkFrequencyNum(value, this.state.continuousType)
           break;
 
         case 'month':
-          isInvalidMsg[name] = this.checkMonth(value)
+          isInvalidMsg[name] = this.Validator.checkMonth(value)
           break;
         
         case 'year': 
-          isInvalidMsg[name] = this.checkYear(value)
+          isInvalidMsg[name] = this.Validator.checkYear(value)
+          break
+        default: 
+          return isInvalidMsg
       }
     })
     return isInvalidMsg
-  }
-
-  checkCity(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'City field most be chose from on of the opened list above'
-      return msg
-    }
-    const cities = Object.values(this.props.cFF.cities).map(value => value.toLowerCase());
-    if (cities.indexOf(value) === -1) {
-      msg = 'City field most be chose from on of the opened list above'
-    }
-    return msg;
-  }
-
-  checkSubType(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'subType field most be chose from on of the opened list above'
-      return msg
-    }
-    const subTypes = Object.values(this.props.cFF.subTypes).map(value => value.toLowerCase());
-    if (subTypes.indexOf(value) === -1) {
-      msg = 'subType field most be chose from on of the opened list above'
-    }
-    return msg;
-  }
-
-  checkUnit(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'Unit should not be empty and most be chose from on of the opened list above'
-    }
-    const units = Object.values(this.props.common.units);
-    if (units.indexOf(value) === -1) {
-      msg = 'Unit most be chose from on of the opened list above'
-    }
-    return msg;
-  }
-
-  checkPrice(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'Price should not be empty'
-    }
-    return msg;
-  }
-
-  checkAvailableQuantity(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'Available quantity should not be empty'
-    }
-    return msg;
-  }
-
-  checkYourName(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'Your Name field should not be empty'
-    }
-    return msg;
-  }
-
-  checkEmail(value) {
-    let msg = '';
-    const emailRe = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    if (value === '') {
-      msg = 'Email or Phone should not be empty';
-    } else if (!emailRe.test(value)) {
-      msg = 'Email is not correct';
-    }
-    return msg
-  }
-
-  checkPhone(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'Phone should not be empty';
-    } 
-    return msg
-  }
-
-  checkComment(value) {
-    let msg = '';
-    if (value.length > 199) {
-      msg = 'This is a maximum size';
-    } 
-    return msg
-  }
-
-  checkQuantity(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'Quantity should not be empty';
-    } 
-    return msg
-  }
-
-  checkFrequencyNum(value) {
-    let msg = '';
-    if (value === '') {
-      msg = '???? should not be empty and most be chose from on of the opened list above'
-      return msg
-    }
-    const continuousType = this.state.continuousType
-    let values = []
-    if (continuousType ==='day') {
-      values = ['1', '2', '3', '4', '5', '6']
-    } else if (continuousType === 'week') {
-      values = ['1', '2', '3']
-    } else {
-      values = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
-    }
-    if (values.indexOf(value) === -1) {
-      msg = '??? most be chose from on of the opened list above'
-    }
-    return msg
-  }
-
-  checkMonth(value) {
-    let msg = ''
-    if (value === '') {
-      return msg = 'Month field should not be empty'
-    }
-    const months = moment().localeData().months()
-    const numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
-    if (numbers.indexOf(value) === -1 && months.indexOf(value) === -1) {
-      msg = 'Ամիս դաշտը պետք է ընտրված լինի ներքևում բացված ցուցակից կամ դրան համապատասխան թիվ մուտքագրվի'
-    }
-    return msg 
-  }
-
-  checkYear(value) {
-    let msg = ''
-    if (value === '') {
-      return msg = 'Year field should not be empty'
-    }
-    const currentYear = new Date().getFullYear();
-    const years = []
-    for (let year = currentYear; year < currentYear + 31; year++) {
-      years.push(String(year))
-    }
-    if (years.indexOf(value) === -1) {
-      msg = 'Տարի դաշտը պետք է համապատասխանի ներքևում բացված ցուցակի որևե անդամի հետ'
-    }
-    return msg
   }
 }
 
@@ -802,11 +638,9 @@ const mapStateToProps = (state) => {
   return {
     common: state.content.common,
     cFF: state.content.Filter,
-    email: state.user.email,
-    isFetchingAddNew: state.proposals.isFetchingAddNew,
-    startAddNewProposalAction: state.startAddNewProposalAction,
-    addNewProposalAction: state.addNewProposalAction
+    user: state.user,
+    isFetchingAddNew: state.proposals.descriptions.isFetchingAddNew,
   }
 }
 
-export default connect(mapStateToProps, { startAddNewProposalAction, addNewProposalAction })(AddNewEditProposal)
+export default connect(mapStateToProps)(AddNewEditProposal)

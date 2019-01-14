@@ -3,6 +3,10 @@ import * as types from '../actions/constant-types'
 const initialState = {
     isLoaded: false,
     city: {
+        erevan: {
+            proposal: 0,
+            demand: 0
+        },
         ashtarak: {
             proposal: 0,
             demand: 0
@@ -239,11 +243,123 @@ const initialState = {
             proposal: 0,
             demand: 0
         },
+        macun: {
+            proposal: 0,
+            demand: 0
+        },
+        katnashor: {
+            proposal: 0,
+            demand: 0
+        },
+        karag: {
+            proposal: 0,
+            demand: 0
+        },
+        yux: {
+            proposal: 0,
+            demand: 0
+        },
         garan_mis: {
             proposal: 0,
             demand: 0
         },
         khozi_mis: {
+            proposal: 0,
+            demand: 0
+        },
+        tavari_mis: {
+            proposal: 0,
+            demand: 0
+        },
+        jagari_mis: {
+            proposal: 0,
+            demand: 0
+        },
+        havi_mis: {
+            proposal: 0,
+            demand: 0
+        },
+        aqlori_mis: {
+            proposal: 0,
+            demand: 0
+        },
+        jagar: {
+            proposal: 0,
+            demand: 0
+        },
+        kov: {
+            proposal: 0,
+            demand: 0
+        },
+        hort: {
+            proposal: 0,
+            demand: 0
+        },
+        vochxar: {
+            proposal: 0,
+            demand: 0
+        },
+        gar: {
+            proposal: 0,
+            demand: 0
+        },
+        khoz: {
+            proposal: 0,
+            demand: 0
+        },
+        khochkor: {
+            proposal: 0,
+            demand: 0
+        },
+        mexr: {
+            proposal: 0,
+            demand: 0
+        },
+        mexvamom: {
+            proposal: 0,
+            demand: 0
+        },
+        propolis: {
+            proposal: 0,
+            demand: 0
+        },
+        mexvayntaniq: {
+            proposal: 0,
+            demand: 0
+        },
+        mexvamayr: {
+            proposal: 0,
+            demand: 0
+        },
+        petak: {
+            proposal: 0,
+            demand: 0
+        },
+        caxkaposhi: {
+            proposal: 0,
+            demand: 0
+        },
+        varung: {
+            proposal: 0,
+            demand: 0
+        },
+        pomidor: {
+            proposal: 0,
+            demand: 0
+        },
+        kartofil: {
+            proposal: 0,
+            demand: 0
+        },
+        kaxamb: {
+            proposal: 0,
+            demand: 0
+        },
+        sxtor: {
+            proposal: 0,
+            demand: 0
+        },
+        badrijan: {
             proposal: 0,
             demand: 0
         },
@@ -259,19 +375,123 @@ const initialState = {
             proposal: 0,
             demand: 0
         },
+        nur: {
+            proposal: 0,
+            demand: 0
+        },
+        tuz: {
+            proposal: 0,
+            demand: 0
+        },
+        dzmeruk: {
+            proposal: 0,
+            demand: 0
+        },
+        limon: {
+            proposal: 0,
+            demand: 0
+        },
         khaxox: {
             proposal: 0,
             demand: 0
         },
-        khncoreni: {
+        mori: {
             proposal: 0,
             demand: 0
         },
-        saloreni: {
+        malina: {
             proposal: 0,
             demand: 0
         },
-        tanceni: {
+        haxarj: {
+            proposal: 0,
+            demand: 0
+        },
+        aloj: {
+            proposal: 0,
+            demand: 0
+        },
+        mosh: {
+            proposal: 0,
+            demand: 0
+        },
+        hon: {
+            proposal: 0,
+            demand: 0
+        },
+        coren: {
+            proposal: 0,
+            demand: 0
+        },
+        gari: {
+            proposal: 0,
+            demand: 0
+        },
+        kukuruz: {
+            proposal: 0,
+            demand: 0
+        },
+        grechka: {
+            proposal: 0,
+            demand: 0
+        },
+        hajar: {
+            proposal: 0,
+            demand: 0
+        },
+        chamich: {
+            proposal: 0,
+            demand: 0
+        },
+        cirani_chir: {
+            proposal: 0,
+            demand: 0
+        },
+        salori_chir: {
+            proposal: 0,
+            demand: 0
+        },
+        chor_tut: {
+            proposal: 0,
+            demand: 0
+        },
+        cirani_jem: {
+            proposal: 0,
+            demand: 0
+        },
+        khncor_jem: {
+            proposal: 0,
+            demand: 0
+        },
+        hamem: {
+            proposal: 0,
+            demand: 0
+        },
+        petrushka: {
+            proposal: 0,
+            demand: 0
+        },
+        rehan: {
+            proposal: 0,
+            demand: 0
+        },
+        aveluk: {
+            proposal: 0,
+            demand: 0
+        },
+        nana: {
+            proposal: 0,
+            demand: 0
+        },
+        mrgatu_careri: {
+            proposal: 0,
+            demand: 0
+        },
+        hataptxayin_tperi: {
+            proposal: 0,
+            demand: 0
+        },
+        banjarexenayin_buyseri: {
             proposal: 0,
             demand: 0
         }
@@ -285,6 +505,22 @@ const initialState = {
             proposal: 0,
             demand: 0
         },
+        kendaniner: {
+            proposal: 0,
+            demand: 0
+        },
+        trchunner_cu: {
+            proposal: 0,
+            demand: 0
+        },
+        ckner_ikra: {
+            proposal: 0,
+            demand: 0
+        },
+        mexvamterq: {
+            proposal: 0,
+            demand: 0
+        },
         banjarexen: {
             proposal: 0,
             demand: 0
@@ -294,6 +530,10 @@ const initialState = {
             demand: 0
         },
         hataptux: {
+            proposal: 0,
+            demand: 0
+        },
+        grain_culture: {
             proposal: 0,
             demand: 0
         },
@@ -313,6 +553,10 @@ const initialState = {
             proposal: 0,
             demand: 0
         },
+        busakan_teyer: {
+            proposal: 0,
+            demand: 0
+        },
         tnkiner: {
             proposal: 0,
             demand: 0
@@ -327,8 +571,8 @@ const sumOf = (state = initialState, action) => {
                 ...state,
                 ...action.payload,
                 isLoaded: true
-            }            
-    
+            }
+
         default:
             return state
     }

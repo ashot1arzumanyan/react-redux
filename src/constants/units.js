@@ -1,8 +1,12 @@
 const units = [
     'kg',
     'hat',
+    'litr',
+    'metr',
+    'tonna',
+    'centner',
     'gram',
-    'tonna'
+    'punj'
 ]
 
-export default units;
+module.exports = units;

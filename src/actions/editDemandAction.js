@@ -1,9 +1,12 @@
 import * as types from './constant-types'
- 
+import getSumOfAction from './getSumOfAction'
+import { handleResponse, handleError } from '../helpers/fetchHandlers' 
+
 const editDemandAction = (data, cb) => {
     return dispatch => {
+        dispatch(editDemandStartFetching)
         const access_token = localStorage.getItem('access_token');
-        fetch('/demandStatement', {
+        fetch('/auth/demandStatement', {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
@@ -12,47 +15,34 @@ const editDemandAction = (data, cb) => {
             }, 
             body: JSON.stringify(data)
         })
-        .then((res) => {
-            return res.json();
-        })
+        .then(handleResponse)
         .then((data) => {
-            if(data.ok) {
-                cb()
-                return dispatch(editDemandSuccess());
-            }
-            throw new Error(data.errors || 'Something wrong')
+            dispatch(editDemandSuccess(data));
+            cb();
+            setTimeout(() => {
+                dispatch(getSumOfAction())
+            }, 2000);
         })
-        .catch(err => {
-            console.error(err);
-            dispatch(editDemandFail(err));
+        .catch(res => {
+            dispatch(editDemandFail);
+            handleError(res, dispatch)
         })
     }
 }
 
-const startEditDemandAction = () => {
-    return dispatch => {
-        dispatch(editDemandStartFetching())
-    }
+const editDemandStartFetching = {
+    type: types.EDIT_DEMAND_START_FETCHING
 }
 
-
-const editDemandStartFetching = () => {
-    return {
-        type: types.EDIT_DEMAND_START_FETCHING,
-    }
-}
-
-const editDemandSuccess = () => {
-    return {
+const editDemandSuccess = (demand) => { 
+    return  {
         type: types.EDIT_DEMAND_SUCCESS,
+        payload: demand
     }
 }
 
-const editDemandFail = err => {
-    return {
-        type: types.EDIT_DEMAND_FAIL,
-        payload: err
-    }
+const editDemandFail = {
+    type: types.EDIT_DEMAND_FAIL
 }
 
-export { startEditDemandAction, editDemandAction };
+export default editDemandAction;

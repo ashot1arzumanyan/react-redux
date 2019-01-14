@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Form, Button, Card } from 'reactstrap'
+import { Form, Button } from 'reactstrap'
 
 import registerUser from '../actions/registerUserAction'
 import InputLabel from './inputs/InputLabel'
-import InputWithJumperLabel from '../helpers/InputWithJumperLabel'
+import { handleFocus, handleBlur, handleInput, setIsBlurredTrue } from '../helpers/inputJumperLabelWithValidation'
+import { Validator, validate, validateAll } from '../helpers/Validator'
+import ButtonContent from './ButtonContent'
 
 class Register extends Component {
 
@@ -25,44 +27,20 @@ class Register extends Component {
       }
     }
 
-    this.handleOnFocus = this.handleOnFocus.bind(this)
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleOnBlur = this.handleOnBlur.bind(this);
-    this.handleOnInput = this.handleOnInput.bind(this)
-  }
-
-  handleOnFocus(e) {
-    const input = new InputWithJumperLabel(e)
-    input.focus()
-  }
-
-  handleOnBlur(e) {
-    const input = new InputWithJumperLabel(e)    
-    const { name, value } = input.getNameValue()
-    input.blur()
-    this.setIsBlurredTrue(name)
-    this.validate(name, value)
-  }
-
-  handleOnInput(e) {
-    const input = new InputWithJumperLabel(e)
-    const { name, value } = input.getNameValue()
-    if (this.state.isBlurred[name]) {
-      this.validate(name, value)
-    }
-    this.setState({ [name]: value })
-  }
-
-  setIsBlurredTrue(name) {
-    const isBlurred = { ...this.state.isBlurred }
-    isBlurred[name] = true
-    this.setState({ isBlurred: isBlurred })
+    this.handleFocus = handleFocus 
+    this.handleBlur = handleBlur.bind(this)
+    this.handleInput = handleInput.bind(this)
+    this.setIsBlurredTrue = setIsBlurredTrue.bind(this)
+    this.validate = validate.bind(this)
+    this.validateAll = validateAll.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
+    this.Validator = Object.create(Validator.prototype)
   }
 
   handleSubmit(e) {
     e.preventDefault();
     const hasInvalidMsg = this.validateAll()
-    if (!hasInvalidMsg) {
+    if (!hasInvalidMsg && !this.props.userRegister.isFetching) {
       const { email, username, password, repeat_password } = this.state
       this.props.registerUser({
         email: email,
@@ -76,29 +54,27 @@ class Register extends Component {
   render() {
 
     const { isInvalidMsg, isBlurred } = this.state;
-    const { userRegister } = this.props
+    const { userRegister, content, common } = this.props
 
     const commonProps = {
-      onFocus: this.handleOnFocus,
-      onBlur: this.handleOnBlur,
-      onInput: this.handleOnInput,
+      onFocus: this.handleFocus,
+      onBlur: this.handleBlur,
+      onInput: this.handleInput,
       isBlurred: isBlurred,
       isInvalidMsg: isInvalidMsg
     }
 
     if (userRegister.confirmationMsgSent) {
-
-      const CheckYourEmail = ({username, email}) => {
-        return (
-          <Card className='align-items-center'>
-            <div className='col-4 d-flex flex-column align-items-center'>
-              <h1>Բարև {username}</h1>
-              <p className='text-center'>Գրանցումն ավարտելու համար խնդրւմ ենք ստուգել ձեր {email} հասցեն և հաստատել ձեր գրանցումը սեխմելով հաստատել կոճակը</p>
-            </div>
-          </Card>
-        )
-      }
-      return <CheckYourEmail username={userRegister.username} email={userRegister.email} />
+      return (
+        <div className='d-flex justify-content-center align-items-center'>
+          <div className='col-4 d-flex flex-column align-items-center'>
+            <p 
+              className='text-center'>
+              {content.registrationSuccess}
+            </p>
+          </div>
+        </div>
+      )
     }
 
     return (
@@ -124,46 +100,20 @@ class Register extends Component {
             type='password'
             commonProps={commonProps}
           />
-          <Button 
-            color='success'
-            onClick={this.handleSubmit}
-            >
-            Register
-          </Button>
+          <div className='d-flex justify-content-center mt-4'>
+            <Button 
+              type='submit'
+              onClick={this.handleSubmit}
+              >
+              <ButtonContent 
+                isFetching={userRegister.isFetching}
+                content={common.register}
+              />
+            </Button>
+          </div>
         </Form>
       </div>
     );
-  }
-
-  validateAll() {
-    const isBlurred = { ...this.state.isBlurred }
-    let entries = []
-    let input
-    const names = Object.keys(isBlurred)
-    names.forEach(name => {
-      isBlurred[name] = true 
-      input = document.getElementById(name)
-      entries.push({ name: name, value: input.value })
-    })
-    const isInvalidMsg = this.msgCreator(entries)
-    this.setState({
-      isBlurred: isBlurred,
-      isInvalidMsg: isInvalidMsg
-    })
-    let hasInvalidMsg = false
-    names.forEach(name => {
-      if (!hasInvalidMsg && isInvalidMsg[name] !== '') {
-        hasInvalidMsg = true
-      }
-    })
-    return hasInvalidMsg
-  }
-
-  validate(name, value) {
-    const isInvalidMsg = this.msgCreator([{ name: name, value: value.trim() }])
-    this.setState({
-      isInvalidMsg: isInvalidMsg
-    })
   }
 
   msgCreator(entries = []) {
@@ -176,84 +126,44 @@ class Register extends Component {
       isInvalidMsg[name] = ''
       switch (name) {
         case 'email':
-          isInvalidMsg[name] = this.checkEmail(value)
+          isInvalidMsg[name] = this.Validator.checkEmail(value)
           break;
   
         case 'username':
-          isInvalidMsg[name] = this.checkUsername(value)
+          isInvalidMsg[name] = this.Validator.checkUsername(value)
           break;
   
         case 'password':
-          const repeat_password = document.querySelector('input[name = "repeat_password"]');
-          if (value === '') {
-            isInvalidMsg[name] = 'Password should not be empty and most be at least 7 characters'
-            break;
-          }
-          if (value.length < 7) {
-            isInvalidMsg[name] = 'Password most be at least 7 characters'
-            break;
-          }
-          if (value !== repeat_password.value.trim()) {
-            isInvalidMsg[name] = 'Passwords not matched';
-            isInvalidMsg[repeat_password.name] = 'Passwords not matched';
-            break;
-          } else {
-            isInvalidMsg[repeat_password.name] = '';
-          }
+          const { 
+            passwordMsg, 
+            repeat_passwordMsg } = this.Validator.checkPassword(value, isInvalidMsg.repeat_password);
+          isInvalidMsg[name] = passwordMsg;
+          isInvalidMsg.repeat_password = repeat_passwordMsg;
           break;
-  
+
         case 'repeat_password':
-          const password = document.querySelector('input[name = "password"]');
-          if (value === '') {
-            isInvalidMsg[name] = 'Password should not be empty and most be at least 7 characters'
-            break;
-          }
-          if (value.length < 7) {
-            isInvalidMsg[name] = 'Password most be at least 7 characters'
-            break;
-          }
-          if (value !== password.value.trim()) {
-            isInvalidMsg[name] = 'Passwords not matched';
-            isInvalidMsg[password.name] = 'Passwords not matched';
-            break;
-          } else {
-            isInvalidMsg[password.name] = '';
-          }
+          const { 
+            passwordMsg_2,
+            repeat_passwordMsg_2 } = this.Validator.checkRepeatPassword(value, isInvalidMsg.password);
+          isInvalidMsg[name] = repeat_passwordMsg_2;
+          isInvalidMsg.password = passwordMsg_2;
+          break;
+        default:
+          break;
       }
     })
 
     return isInvalidMsg
   }
 
-  checkEmail(value) {
-    let msg = '';
-    const emailRe = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    if (value === '') {
-      msg = 'Email should not be empty and most be a correct email';
-    } else if (!emailRe.test(value)) {
-      msg = 'Email is not correct';
-    }
-    return msg
-  }
-
-  checkUsername(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'Username should not be empty and most be at least 3 characters'
-    } else if (value.length < 3) {
-      msg = 'Username most be at least 3 characters'
-    }
-    return msg
-  }
 }
 
 const mapstateToProps = (state) => {
   return {
-    // content: state.content.Register,
-    userRegister: state.userRegister
+    content: state.content.Register,
+    common: state.content.common,
+    userRegister: state.userRegister,
   }
 }
 
-const connectRegister = connect(mapstateToProps, { registerUser })(Register)
-
-export default connectRegister
+export default connect(mapstateToProps, { registerUser })(Register)

@@ -1,21 +1,21 @@
 import moment from 'moment'
+import setTitle from '../helpers/setTitle'
 
 const getContentByLang = lang => {
-    return dispatch => {
+    setTimeout(() => {        
         if (lang === 'hy') {
             moment.locale('hy-am')
         } else {
             moment.locale(lang)
         }
-        fetch('/lang', { headers: new Headers({ 'Content-Language': lang }) })
-            .then(res => {
-                // console.log(res);
-                return res.json()
-            })
-            .then(content => {
-                // console.log(content);
+        setTitle(lang)
+    }, 0);
+    return dispatch => {
+        fetch(`/lang/${lang}`)
+            .then(res => res.json())
+            .then(data => {
                 localStorage.setItem('lang', lang);
-                dispatch(setLang(content));
+                dispatch(setLang(data));
             })
             .catch(err => console.log(err))
     }

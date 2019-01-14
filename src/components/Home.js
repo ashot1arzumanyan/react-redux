@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { connect } from 'react-redux'
 
 import Filter from './Filter'
@@ -6,31 +6,58 @@ import Proposal from './proposal/Proposal'
 import Demand from './demand/Demand'
 
 import { resetFilters } from '../actions/filterByAction'
-import getDemandsAction from '../actions/getDemandsAction'
-import getProposalsAction from '../actions/getProposalsAction'
+import getStatements from '../actions/getStatementsAction'
 
 class Home extends Component {
 
   constructor(props) {
     super(props)
 
+    this.state = {
+      isProposalOpen: true,
+      isDemandOpen: true,
+      filteredProposalsCount: null,
+      filteredDemandsCount: null
+    }
+
     this.handleScroll = this.handleScroll.bind(this)
+    this.toggleIsDemandOpen = this.toggleIsDemandOpen.bind(this)
+    this.toggleIsProposalOpen = this.toggleIsProposalOpen.bind(this)
+    this.setCounts = this.setCounts.bind(this)
+    this.resetCounts = this.resetCounts.bind(this)
   }
 
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll)
   }
 
+  toggleIsProposalOpen() {
+    this.setState({
+      isProposalOpen: !this.state.isProposalOpen
+    })
+  }
+
+  toggleIsDemandOpen() {
+    this.setState({
+      isDemandOpen: !this.state.isDemandOpen
+    })
+  }
+
+  setCounts(filteredProposalsCount, filteredDemandsCount) {
+    this.setState({
+      filteredProposalsCount: filteredProposalsCount,
+      filteredDemandsCount: filteredDemandsCount
+    })
+  }
+
+  resetCounts() {
+    this.setState({
+      filteredProposalsCount: null,
+      filteredDemandsCount: null
+    })
+  }
+
   handleScroll() {
-    const { skip_proposal, 
-      count_proposal, 
-      isFetchingGet_proposal, 
-      linkToCachedAll_proposal,
-      skip_demand, 
-      count_demand, 
-      isFetchingGet_demand, 
-      linkToCachedAll_demand
-    } = this.props
     const scrollTop = (document.documentElement &&
       document.documentElement.scrollTop ) ||
       document.body.scrollTop;
@@ -43,14 +70,11 @@ class Home extends Component {
       window.innerHeight;
 
     const scrollToBottom = Math.ceil( (scrollTop + clientHeight) ) >= scrollHeight
-    // console.log(scrollToBottom);
-    // console.log(count_proposal, count_demand);
+
     if (scrollToBottom) {
-      if (skip_proposal < count_proposal && !isFetchingGet_proposal) {
-        this.props.getProposalsAction(skip_proposal, linkToCachedAll_proposal)
-      }
-      if (skip_demand < count_demand && !isFetchingGet_demand) {
-        this.props.getDemandsAction(skip_demand, linkToCachedAll_demand)
+      const { p, d } = this.props
+      if ((p.skip < p.count && !p.isFetchingGet) || (d.skip < d.count && !d.isFetchingGet)) {
+        this.props.getStatements(p.skip, p.linkToCachedAll, d.skip, d.linkToCachedAll)
       }
     }
   }
@@ -62,40 +86,55 @@ class Home extends Component {
 
   render() {
 
-    const { skip_proposal, isFetchingGet_proposal, skip_demand, isFetchingGet_demand } = this.props
+    const { p, d } = this.props
+    const { isProposalOpen, isDemandOpen, filteredProposalsCount, filteredDemandsCount } = this.state
+
     return(
-      <div >
-        <Filter />
-        <div className="mt-4 d-flex w-100">
-          <div className='proposal_demand_container'>
-            <Proposal 
-              skip={skip_proposal}
-              isFetchingGet={isFetchingGet_proposal}
-            />          
-          </div>
-          <div className='proposal_demand_container'>
-            <Demand 
-              skip={skip_demand}
-              isFetchingGet={isFetchingGet_demand}
-            />          
-          </div>
+      <Fragment>
+        <Filter 
+          setCounts={this.setCounts}
+          resetCounts={this.resetCounts}
+        />
+        <div 
+          className='mt-4 d-flex w-100 justify-content-center'>
+          {isProposalOpen ? (
+            <div className='d-flex justify-content-center w-50'>
+              <div 
+                className='proposal_demand_container'>
+                <Proposal 
+                  toggleIsDemandOpen={this.toggleIsDemandOpen}
+                  descriptions={p}
+                  filteredCount={filteredProposalsCount}
+                />          
+              </div>
+            </div>
+          ) : (null)}
+          {isDemandOpen ? (
+            <div className='d-flex justify-content-center w-50'>
+              <div 
+                className='proposal_demand_container'>
+                <Demand 
+                  toggleIsProposalOpen={this.toggleIsProposalOpen}
+                  descriptions={d}
+                  filteredCount={filteredDemandsCount}
+                />          
+              </div>
+            </div>
+          ) : (null)}
         </div>
-      </div>
+      </Fragment>
     )
   }
 }
 
 const mapStateToProps = (state) => {
   return {
-    isFetchingGet_demand: state.demands.isFetchingGet,
-    skip_demand: state.demands.skip,
-    count_demand: state.demands.count,
-    linkToCachedAll_demand: state.demands.linkToCachedAll,
-    isFetchingGet_proposal: state.proposals.isFetchingGet,
-    skip_proposal: state.proposals.skip,
-    count_proposal: state.proposals.count,
-    linkToCachedAll_proposal: state.proposals.linkToCachedAll
+    p: state.proposals.descriptions,
+    d: state.demands.descriptions,
+    filterBy: state.filterBy
   }
 }
 
-export default connect(mapStateToProps, {resetFilters, getDemandsAction, getProposalsAction})(Home)
+export default connect(
+  mapStateToProps, 
+  {resetFilters, getStatements})(Home)

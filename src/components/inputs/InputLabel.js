@@ -6,8 +6,11 @@ import { FormGroup, Label, Input, FormFeedback } from 'reactstrap'
 class InputLabel extends Component {
   render() {
 
-    const { common, name, type, commonProps: { onInput, onBlur, onFocus, isBlurred, isInvalidMsg } } = this.props
+    const { common, warningMsgs, name, type, commonProps: { onInput, onBlur, onFocus, isBlurred, isInvalidMsg } } = this.props
     const contentName = 'contentName' in this.props ? this.props.contentName : name
+
+    // const valid = isBlurred[name] && isInvalidMsg[name] === '' 
+    // const invalid = isBlurred[name] && isInvalidMsg[name] !== ''
 
     return (
       <FormGroup className='jumperLabel'>
@@ -22,7 +25,7 @@ class InputLabel extends Component {
           valid = { isBlurred[name] && isInvalidMsg[name] === '' }
           invalid = { isBlurred[name] && isInvalidMsg[name] !== '' }
           />
-          <FormFeedback>{ isInvalidMsg[name] }</FormFeedback>               
+          <FormFeedback>{ warningMsgs[isInvalidMsg[name]] }</FormFeedback>               
       </FormGroup>
     )
   }
@@ -31,6 +34,7 @@ class InputLabel extends Component {
 const mapStateToProps = (state) => {
   return {
     common: state.content.common,
+    warningMsgs: state.content.warningMsgs
   }
 }
 

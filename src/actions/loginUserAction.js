@@ -1,7 +1,9 @@
 import * as types from './constant-types'
+import { handleResponse, handleError } from '../helpers/fetchHandlers'
 
 const loginUser = (userInfo, cb) => {
     return dispatch => {
+        dispatch(loginStartFetching)
         fetch('/login', {
             method: 'POST',
             headers: {
@@ -10,23 +12,21 @@ const loginUser = (userInfo, cb) => {
             }, 
             body: JSON.stringify(userInfo)
         })
-        .then((res) => {
-            return res.json();
-        })
+        .then(handleResponse)
         .then((data) => {
-            if(data.ok) {
-                localStorage.setItem('access_token', data.access_token);
-                dispatch(loginSucces(data.user));
-                cb();
-                return
-            }
-            throw new Error(data.errors || 'Something wrong')
+            localStorage.setItem('access_token', data.access_token);
+            dispatch(loginSucces(data.user));
+            cb();
         })
-        .catch(err => {
-            console.error(err);
-            dispatch(loginFail(err));
-        });
+        .catch(res => {
+            dispatch(loginFail);
+            handleError(res, dispatch)
+        })
     }
+}
+
+const loginStartFetching = {
+    type: types.LOGIN_START_FETCHING
 }
 
 const loginSucces = (res) => {
@@ -36,11 +36,8 @@ const loginSucces = (res) => {
     }
 }
 
-const loginFail = (err) => {
-    return {
-        type: types.LOGIN_FAIL,
-        payload: err
-    }
+const loginFail = {
+    type: types.LOGIN_FAIL
 }
 
 export default loginUser;

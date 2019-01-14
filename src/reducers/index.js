@@ -6,8 +6,13 @@ import userRegister from './userRegister'
 import proposals from './proposals'
 import demands from './demands'
 import sumOf from './sumOf'
+import filteredSumOfByRegion from './filteredSumOfByRegion'
+import filteredSumOfByCity from './filteredSumOfByCity'
+import filteredSumOfByType from './filteredSumOfByType'
 import demandsById from './demandsById'
 import proposalsById from './proposalsById'
+import errors from './errors'
+import isFetchings from './isFetchings'
 
 import filterBy from './filterBy'
 
@@ -18,9 +23,14 @@ const reducers = combineReducers({
     proposals, 
     demands, 
     sumOf,
+    filteredSumOfByRegion,
+    filteredSumOfByCity,
+    filteredSumOfByType,
     filterBy,
     demandsById,
-    proposalsById
+    proposalsById,
+    errors,
+    isFetchings
 });
 
 export default reducers

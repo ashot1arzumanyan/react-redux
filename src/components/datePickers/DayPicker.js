@@ -3,13 +3,19 @@ import { connect } from 'react-redux'
 import { FormGroup, Label, Input, ListGroup, ListGroupItem } from 'reactstrap'
 import moment from 'moment'
 
+import DropdownInputWithJumperLabelFocus from '../../helpers/DropdownInputWithJumperLabelFocus'
+
 class MonthPicker extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
-      lastDay: 31
+      lastDay: 31,
+      isListOpen: false,
+      isInputHasValue: false
     }
+
+    this.DropdownInputWithJumperLabelFocus = DropdownInputWithJumperLabelFocus.bind(this)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -30,32 +36,38 @@ class MonthPicker extends Component {
 
   render() {
 
-    const { common, commonProps: { onFocus, onBlur, onInput, onClick } } = this.props
+    const { common, onBlur, onInput, onClick } = this.props
     const days = this.generateDays(this.state.lastDay)
-    
+    const { isListOpen, isInputHasValue } = this.state
+
     return ( 
       <FormGroup className='jumperLabel'>
-        <Label for='day'>{common.day}</Label>
+        <Label 
+          for='day'
+          className={isInputHasValue ? 'jump' : 'jumpCancel'}>
+          {common.day}
+        </Label>
         <Input 
           id='day'
           type="text" 
           name="day"
-          onFocus={onFocus}
+          tabIndex='-1'
+          autoComplete="off"
+          onFocus={this.DropdownInputWithJumperLabelFocus}
           onInput={onInput}
           onBlur={onBlur}
-          // valid = { isBlurred.unit && isInvalidMsg.unit === '' }
-          // invalid = { isBlurred.unit && isInvalidMsg.unit !== '' }
         />
-        {/* <FormFeedback>{ isInvalidMsg.unit }</FormFeedback> */}
-        <ListGroup className='d-none select'>
-          {days.map(day => 
-            <ListGroupItem 
-              key={day} 
-              onClick={onClick}>
-              {day}
-            </ListGroupItem>
-          )}
-        </ListGroup>
+        {isListOpen ? (
+          <ListGroup className='select'>
+            {days.map(day => 
+              <ListGroupItem 
+                key={day} 
+                onClick={onClick}>
+                {day}
+              </ListGroupItem>
+            )}
+          </ListGroup>
+        ) : (null)}
       </FormGroup>
     )
   }

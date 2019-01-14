@@ -1,5 +1,7 @@
 const initialState = {
     common: {
+        proposal: "",
+        demand: "",
         region: "",
         city: "",
         type: "",
@@ -9,6 +11,7 @@ const initialState = {
         available_quantity: "",
         email: "",
         phone: "",
+        description_one_word: "",
         comment: "",
         plan_to_have: "",
         quantity: "",
@@ -26,21 +29,39 @@ const initialState = {
         password: "",
         repeat_password: "",
         yourName: "",
-        units: {
-            kg: "",
-            hat: "",
-            gram: "",
-            tonna: ""
-        }
+        current_password: "",
+        new_password: "",
+        repeat_new_password: "",
+        more: "",
+        login: "",
+        register: "",
+        send_instruction: "",
+        change_password: "",
+        ask_to_delete: "",
+        delete: "",
+        cancel: ""
     },
-    Login: {},
+    Login: {
+        forgot_password: ""
+    },
+    Register: {
+        registrationSuccess: ""
+    },
     addNewDemand: {
     },
     Navigation: {
         login: "",
         register: "",
         addNewProposal: "",
-        addNewDemand: ""
+        addNewDemand: "",
+        my_statements: "",
+        settings: "",
+        logout: ""
+    },
+    Settings: {
+        change_personal_info: "",
+        change_password: "",
+        remove_account: ""
     },
     Filter: {
         regions: {
@@ -57,6 +78,7 @@ const initialState = {
             vayoc_cor: ""
         },
         cities: {
+            erevan: "",
             ashtarak: "",
             aparan: "",
             talin: "",
@@ -106,27 +128,125 @@ const initialState = {
         types: {
             katnamterq: "",
             msamterq: "",
+            kendaniner: "",
+            trchunner_cu: "",
+            ckner_ikra: "",
+            mexvamterq: "",
             banjarexen: "",
             mirg: "",
             hataptux: "",
+            ynkuzexen: "",
+            grain_culture: "",
             chir_ev_charaz: "",
             pahaconer: "",
             kanachexen: "",
+            busakan_teyer: "",
             tnkiner: ""
         },
         subTypes: {
             panir: "",
             kat: "",
+            macun: "",
+            katnashor: "",
+            karag: "",
+            yux: "",
             garan_mis: "",
             khozi_mis: "",
+            tavari_mis: "",
+            jagari_mis: "",
+            havi_mis: "",
+            aqlori_mis: "",
+            jagar: "",
+            kov: "",
+            hort: "",
+            vochxar: "",
+            gar: "",
+            khoz: "",
+            khochkor: "",
+            cu: "",
+            ikra: "",
+            mexr: "",
+            mexvamom: "",
+            propolis: "",
+            mexvayntaniq: "",
+            mexvamayr: "",
+            petak: "",
+            caxkaposhi: "",
+            varung: "",
+            pomidor: "",
+            kartofil: "",
+            kaxamb: "",
+            sxtor: "",
+            badrijan: "",
             khncor: "",
             tanc: "",
             ciran: "",
+            nur: "",
+            tuz: "",
+            dzmeruk: "",
+            limon: "",
             khaxox: "",
-            khncoreni: "",
-            saloreni: "",
-            tanceni: ""
+            mori: "",
+            malina: "",
+            haxarj: "",
+            aloj: "",
+            mosh: "",
+            hon: "",
+            coren: "",
+            gari: "",
+            kukuruz: "",
+            grechka: "",
+            hajar: "",
+            chamich: "",
+            cirani_chir: "",
+            salori_chir: "",
+            chor_tut: "",
+            cirani_jem: "",
+            khncor_jem: "",
+            hamem: "",
+            petrushka: "",
+            rehan: "",
+            aveluk: "",
+            nana: "",
+            urc: "",
+            mrgatu_careri: "",
+            hataptxayin_tperi: "",
+            banjarexenayin_buyseri: ""
+        },
+        units: {
+            kg: "",
+            hat: "",
+            litr: "",
+            metr: "",
+            tonna: "",
+            centner: "",
+            gram: "",
+            punj: ""
         }
+    },
+    warningMsgs: {
+        not_empty_not_correct: "",
+        not_correct: "",
+        not_empty_min_3: "",
+        min_3: "",
+        not_empty_min_7: "",
+        min_7: "",
+        passwords_not_match: "",
+        from_list: "",
+        not_empty: "",
+        email_or_phone_not_empty: "",
+        should_be_one_word: "",
+        should_not_be_more_25: ""
+    },
+    serverErrMsgs: {
+        bad_email_or_password: "",
+        email_not_correct: "",
+        username_not_correct: "",
+        password_not_correct: "",
+        passwords_not_matched: "",
+        something_wrong: "",
+        email_not_found: "",
+        wrong_current_password: ""
     }
 }
 

@@ -1,35 +1,33 @@
 import * as types from './constant-types'
+import { handleResponse, handleError } from '../helpers/fetchHandlers'
 
-const getDemandsById = (_id) => {
+const getDemandsById = () => {
+
     return (dispatch) => {
-        dispatch(getDemandsByIdStartFetching())
-        fetch(`/getDemandsById?_id=${_id}`, {
+        dispatch(getDemandsByIdStartFetching)
+        const token = localStorage.getItem('access_token');
+        fetch(`/auth/getDemandsById`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
+                'Authorization':`Bearer ${token}`
             }, 
         })
-        .then((res) => {
-            return res.json();
-        })
+        .then(handleResponse)
         .then((data) => {
-            if(data.ok) {
-                return dispatch(getDemandsByIdSuccess(data.demandsById));
-            }
-            throw new Error(data.errors || 'Something wrong')
+            dispatch(getDemandsByIdSuccess(data));
         })
-        .catch(err => {
-            console.error(err);
-            dispatch(getDemandsByIdFail(err));
+        .catch(res => {
+            dispatch(getDemandsByIdFail);
+            handleError(res, dispatch)
         })
     }
 }
 
-const getDemandsByIdStartFetching = () => {
-    return {
-        type: types.GET_DEMANDS_BY_ID_START_FETCHING,
-    }
+const getDemandsByIdStartFetching = {
+    type: types.GET_DEMANDS_BY_ID_START_FETCHING,
 }
+
 
 const getDemandsByIdSuccess = demands => {
     return {
@@ -38,11 +36,8 @@ const getDemandsByIdSuccess = demands => {
     }
 }
 
-const getDemandsByIdFail = err => {
-    return {
-        type: types.GET_DEMANDS_BY_ID_FAIL,
-        payload: err
-    }
+const getDemandsByIdFail = {
+    type: types.GET_DEMANDS_BY_ID_FAIL,
 }
 
 export default getDemandsById

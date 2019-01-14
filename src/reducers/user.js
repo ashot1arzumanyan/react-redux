@@ -3,20 +3,23 @@ import * as types from '../actions/constant-types'
 const initialState = {
     isFetching: false,
     isLoggedIn: false,
-    isFirstLogin: false,
     email: '',
     username: '',
     _id: '',
-    errors: []
+    phone: '',
 }
 
 const user = (state = initialState, action) => {
     switch (action.type) {
+        case types.LOGIN_START_FETCHING:
+            return {
+                ...state,
+                isFetching: true
+            }
         case types.LOGIN_SUCCESS:
             return {
                 ...state,
                 ...action.payload,
-                errors: [],
                 isLoggedIn: true,
                 isFetching: false,
                 isFirstLogin: false
@@ -27,11 +30,6 @@ const user = (state = initialState, action) => {
                 ...action.payload,
                 isLoggedIn: false,
                 isFetching: false,
-            }
-        case types.CHECK_TOKEN_START_FETCHING:
-            return {
-                ...state,
-                isFetching: true
             }
         case types.CHECK_TOKEN_SUCCESS:
             return {
@@ -47,7 +45,8 @@ const user = (state = initialState, action) => {
                 isFetching: false,
                 email: '',
                 username: '',
-                _id: ''
+                _id: '',
+                phone: ''
             }
         case types.LOGOUT:
             return {
@@ -57,11 +56,38 @@ const user = (state = initialState, action) => {
                 username: '',
                 _id: ''
             }
-        case types.SET_USER_EMAIL:
+
+        case types.CHANGE_PERSONAL_INFO_START_FETCHING: 
             return {
                 ...state,
-                isFirstLogin: true,
-                email: action.payload
+                isFetching: true
+            }
+        case types.CHANGE_PERSONAL_INFO_SUCCESS: 
+            return {
+                ...state,
+                ...action.payload,
+                isFetching: false
+            }
+        case types.CHANGE_PERSONAL_INFO_FAIL: 
+            return {
+                ...state,
+                isFetching: false
+            }
+
+        case types.UPDATE_PASSWORD_START_FETCHING: 
+            return {
+                ...state,
+                isFetching: true
+            }
+        case types.UPDATE_PASSWORD_SUCCESS: 
+            return {
+                ...state,
+                isFetching: false
+            }
+        case types.UPDATE_PASSWORD_FAIL: 
+            return {
+                ...state,
+                isFetching: false
             }
         default:
             return state;

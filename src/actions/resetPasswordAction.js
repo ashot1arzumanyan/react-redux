@@ -1,8 +1,9 @@
 import * as types from './constant-types'
+import { handleResponse, handleError } from '../helpers/fetchHandlers'
 
 const resetPassword = (data, cb) => {
     return dispatch => {
-        dispatch(resetPasswordStartFetching())
+        dispatch(resetPasswordStartFetching);
         fetch('/resetPassword', {
             method: 'PUT',
             headers: {
@@ -10,41 +11,38 @@ const resetPassword = (data, cb) => {
                 'Content-Type': 'application/json',
             }, 
             body: JSON.stringify(data)
-        }).then(res => {
-            return res.json()
-        }).then(data => {
-            if (data.ok) {
-                localStorage.setItem('access_token', data.access_token);
-                dispatch(resetPasswordSuccess(data.user));
-                cb();
-                return;
-            }
-            throw new Error(data.errors || 'something wrong')
-        }).catch(err => {
-            console.error(err);
-            dispatch(resetPasswordFail(err))
+        })
+        .then(handleResponse)
+        .then(data => {
+            localStorage.setItem('access_token', data.access_token);
+            dispatch(login(data.user));
+            dispatch(resetPasswordSuccess)
+            cb();
+        })
+        .catch(res => {
+            dispatch(resetPasswordFail);
+            handleError(res, dispatch)
         })
     }
 }
 
-const resetPasswordStartFetching = () => {
-    return {
-        type: types.RESET_PASSWORD_SEND_EMAIL_START_FETCHING
-    }
+const resetPasswordStartFetching = {
+    type: types.RESET_PASSWORD_START_FETCHING
 }
 
-const resetPasswordSuccess = (res) => {
+const login = (res) => {
     return {
         type: types.LOGIN_SUCCESS,
         payload: res
     }
 }
 
-const resetPasswordFail = (err) => {
-    return {
-        type: types.RESET_PASSWORD_SEND_EMAIL_FAIL,
-        payload: err
-    }
+const resetPasswordSuccess = {
+    type: types.RESET_PASSWORD_SUCCESS
+}
+
+const resetPasswordFail = {
+    type: types.RESET_PASSWORD_FAIL,
 }
 
 export default resetPassword

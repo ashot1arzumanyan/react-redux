@@ -1,9 +1,12 @@
 import * as types from './constant-types'
- 
+import getSumOfAction from './getSumOfAction'
+import { handleResponse, handleError } from '../helpers/fetchHandlers'
+
 const addNewDemandAction = (data, cb) => {
     return dispatch => {
+        dispatch(addNewDemandStartFetching)
         const access_token = localStorage.getItem('access_token');
-        fetch('/addNewDemand', {
+        fetch('/auth/demandStatement', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -12,35 +15,24 @@ const addNewDemandAction = (data, cb) => {
             }, 
             body: JSON.stringify(data)
         })
-        .then((res) => {
-            return res.json();
-        })
+        .then(handleResponse)
         .then((data) => {
-            if(data.ok) {
-                cb()
-                return dispatch(saveDemandSuccess(data.demand));
-            }
-            throw new Error(data.errors || 'Something wrong')
+            dispatch(saveDemandSuccess(data));
+            setTimeout(() => {
+                dispatch(getSumOfAction())
+            }, 2000);
+            cb()
         })
-        .catch(err => {
-            console.error(err);
-            dispatch(saveDemandFail(err));
+        .catch(res => {
+            dispatch(saveDemandFail);
+            handleError(res, dispatch)
         })
     }
 }
 
-const startAddNewDemandAction = () => {
-    return dispatch => {
-        dispatch(addNewDemandStartFetching())
-    }
-}
-
-
-const addNewDemandStartFetching = () => {
-    return {
+const addNewDemandStartFetching = {
         type: types.SAVE_DEMAND_START_FETCHING,
     }
-}
 
 const saveDemandSuccess = demand => {
     return {
@@ -49,11 +41,8 @@ const saveDemandSuccess = demand => {
     }
 }
 
-const saveDemandFail = err => {
-    return {
-        type: types.SAVE_DEMAND_FAIL,
-        payload: err
-    }
+const saveDemandFail = {
+    type: types.SAVE_DEMAND_FAIL,
 }
 
-export { startAddNewDemandAction ,addNewDemandAction };
+export default addNewDemandAction

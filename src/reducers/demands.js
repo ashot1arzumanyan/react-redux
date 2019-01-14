@@ -1,66 +1,75 @@
 import * as types from '../actions/constant-types'
 
 const initialState = {
-    skip: 0,
-    count: 10,
-    isFetchingGet: false,
-    isFetchingAddNew: false,
-    demands: [], 
-    errors: [],
-    linkToCachedAll: 'a'
+    descriptions: {
+        skip: 0,
+        count: 10,
+        isFetchingGet: false,
+        isFetchingAddNew: false,
+        linkToCachedAll: 'a',
+    },
+    demands: [] 
 }
 
 const demands = (state = initialState, action) => {
+    const descriptions = {...state.descriptions};
     switch (action.type) {
         case types.GET_DEMANDS_START_FETCHING:
+            descriptions.isFetchingGet = true
             return {
                 ...state,
-                isFetchingGet: true
+                descriptions: descriptions 
             } 
         case types.GET_DEMANDS_SUCCESS:
-            const { demands, skip, count, linkToCachedAll } = action.payload
+            const { demands, skip, count, linkToCachedAll } = action.payload;
+            descriptions.skip = skip ? skip : descriptions.count;
+            count && (descriptions.count = count);
+            descriptions.isFetchingGet = false;
+            linkToCachedAll && (descriptions.linkToCachedAll = linkToCachedAll);
             return {
                 ...state,
                 demands: [...state.demands, ...demands],
-                skip: skip ? skip : state.count,
-                count: count ? count : state.count,
-                errors: [],
-                isFetchingGet: false,
-                linkToCachedAll: linkToCachedAll ? linkToCachedAll : state.linkToCachedAll
+                descriptions: descriptions,
+                errors: []
             } 
         case types.GET_DEMANDS_FAIL:
+            descriptions.isFetchingGet = false
             return {
                 ...state,
                 ...action.payload,
-                isFetchingGet: false
+                descriptions: descriptions
             }   
         case types.SAVE_DEMAND_START_FETCHING:
+            descriptions.isFetchingAddNew = true
             return {
                 ...state,
-                isFetchingAddNew: true
+                descriptions: descriptions
             }
         case types.SAVE_DEMAND_SUCCESS:
+            descriptions.skip += 1;
+            descriptions.count += 1;
+            descriptions.isFetchingAddNew = false;
             return {
                 ...state,
                 demands: [ ...action.payload, ...state.demands ],
-                skip: state.skip + 1,
-                count: state.count + 1,
-                isFetchingAddNew: false
+                descriptions: descriptions
             }
         case types.SAVE_DEMAND_FAIL:
+            descriptions.isFetchingAddNew = false
             return {
                 ...state,
-                isFetchingAddNew: false
+                descriptions: descriptions
             }
         case types.DELETE_DEMAND_SUCCESS:
             const demandsWithoutDeletedItem = state.demands.filter(
                 d => d._id !== action.payload 
-            )
+            );
+            descriptions.skip < 1 || (descriptions.skip -= 1);
+            descriptions.count < 1 || (descriptions.count -= 1);
             return {
                 ...state,
                 demands: demandsWithoutDeletedItem,
-                skip: state.skip === 0 ? 0 : state.skip - 1,
-                count: state.count === 0 ? 0 : state.count - 1
+                descriptions: descriptions
             }
         case types.DELETE_DEMAND_FAIL:
             return {
@@ -68,19 +77,26 @@ const demands = (state = initialState, action) => {
                 errors: action.payload
             }
         case types.EDIT_DEMAND_START_FETCHING:
+            descriptions.isFetchingAddNew = true
             return {
                 ...state,
-                isFetchingAddNew: true
+                descriptions: descriptions
             }
         case types.EDIT_DEMAND_SUCCESS:
+            descriptions.isFetchingAddNew = false
+            const newDemands = state.demands.slice()
+            const indexOfEditedDemand = newDemands.findIndex(demand => demand._id === action.payload._id)
+            newDemands.splice(indexOfEditedDemand, 1, action.payload)
             return {
                 ...state,
-                isFetchingAddNew: false
+                descriptions: descriptions,
+                demands: newDemands
             }
         case types.EDIT_DEMAND_FAIL:
+            descriptions.isFetchingAddNew = false
             return {
                 ...state,
-                isFetchingAddNew: false
+                descriptions: descriptions
             }
         default:
             return state

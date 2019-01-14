@@ -1,48 +1,48 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
+import React, { PureComponent } from 'react'
 
 import VerticalDivider from '../proposalDemandCommon/VerticalDivider'
 
-class PlanToHaveContinuous extends Component {
-  render() {
-    const { common, plan_to_have_quantity, plan_to_have_price, continuousType, frequencyNum, } = this.props
-    const ct = common[continuousType].toLowerCase();
-    const lang = localStorage.lang;
-    const Small = () => {
-      const getText = () => {
-        if (frequencyNum === '1') {
-          if (lang === 'ru') {
-            if (continuousType === 'week') {
-              return 'Каждую неделю'
-            } else {
-              return `Каждый ${ct}`
-            }
-          } else if (lang === 'en') {
-            return `Every ${ct}`
-          } else {
-            return `Ամեն ${ct}`;
-          }
-        } else {
-          if (lang === 'ru') {
-            if (continuousType === 'day') {
-              return `Каждые ${frequencyNum} дня`
-            } else if (continuousType === 'week') {
-              return `Каждые ${frequencyNum} недели`
-            } else {
-              return `Каждые ${frequencyNum} месяца`
-            }
-          } else if (lang === 'en') {
-            return `Every ${frequencyNum} ${ct}s`
-          } else {
-            return `Ամեն ${frequencyNum} ${ct}ը մեկ`;
-          }
-        }
+
+const getText = (props) => {
+  const { content, continuousType, frequencyNum, } = props
+  const lang = localStorage.lang;
+  if (frequencyNum === '1') {
+    if (lang === 'ru') {
+      if (continuousType === 'week') {
+        return 'Каждую неделю'
+      } else {
+        return `Каждый ${content}`
       }
-
-      const text = getText()
-
-      return<small>{ text }</small>
+    } else if (lang === 'en') {
+      return `Every ${content}`
+    } else {
+      return `Ամեն ${content}`;
     }
+  } else {
+    if (lang === 'ru') {
+      if (continuousType === 'day') {
+        return `Каждые ${frequencyNum} дня`
+      } else if (continuousType === 'week') {
+        return `Каждые ${frequencyNum} недели`
+      } else {
+        return `Каждые ${frequencyNum} месяца`
+      }
+    } else if (lang === 'en') {
+      return `Every ${frequencyNum} ${content}s`
+    } else {
+      return `Ամեն ${frequencyNum} ${content}ը մեկ`;
+    }
+  }
+}
+const Small = (props) => {
+  return<small>{ getText(props) }</small>
+}
+
+class PlanToHaveContinuous extends PureComponent {
+
+  render() {
+
+    const { plan_to_have_quantity, plan_to_have_price, continuousType, frequencyNum, common } = this.props
 
     return (
       <React.Fragment>
@@ -61,21 +61,19 @@ class PlanToHaveContinuous extends Component {
             </div>
             <VerticalDivider className='mx-3'/>
             <div className='d-flex flex-column justify-content-between align-items-center'>
-              <Small></Small>
+              <Small
+                continuousType={continuousType}
+                frequencyNum={frequencyNum}
+                content={common[continuousType].toLowerCase()}
+              />
               <small className='text-muted'>{ common.frequency }</small>
             </div>
           </div>
-          <small className='text-muted'>Planavorum em unenal</small>
+          <small className='text-muted'>{common.plan_to_have}</small>
         </div>
       </React.Fragment>
     )
   }
 }
 
-const mapStateToProps = (state) => {
-  return{
-    common : state.content.common,
-  }
-}
-
-export default connect(mapStateToProps)(PlanToHaveContinuous)
+export default PlanToHaveContinuous

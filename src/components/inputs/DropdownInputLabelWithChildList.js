@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { FormGroup, Label, Input, ListGroup, ListGroupItem } from 'reactstrap'
 
 import InputWithJumperLabel from '../../helpers/InputWithJumperLabel'
+import DropdownInputWithJumperLabelFocus from '../../helpers/DropdownInputWithJumperLabelFocus'
 import DropdownInputLabelChildList from './DropdownInputLabelChildList'
 
 class DropdownInputLabelWithChildList extends Component {
@@ -13,8 +14,12 @@ class DropdownInputLabelWithChildList extends Component {
     this.childList = []
     this.state = {
       list: [],
-      childList: []
+      childList: [],
+      isListOpen: false,
+      isInputHasValue: false
     }
+
+    this.DropdownInputWithJumperLabelFocus = DropdownInputWithJumperLabelFocus.bind(this)
   }
 
   componentDidMount() {
@@ -86,23 +91,31 @@ class DropdownInputLabelWithChildList extends Component {
   render() {
     
     const { common, cFF, name, type, listName, childName, childListName, onInput, onBlur, onFocus, onClick, isBlurred, isInvalidMsg } = this.props
+    const { isListOpen, isInputHasValue } = this.state
 
     return (
       <Fragment>
         <FormGroup className='jumperLabel'>
-          <Label for={name}>{common[name]}</Label>
+          <Label 
+            for={name}
+            className={isInputHasValue ? 'jump' : 'jumpCancel'}>
+            {common[name]}
+          </Label>
           <Input 
             id={name}
             type={type} 
             name={name}
-            onFocus={onFocus}
+            tabIndex='-1'
+            autoComplete="off"
+            onFocus={this.DropdownInputWithJumperLabelFocus}
             onInput={(e) => {
               onInput(e)
               this.onInputFilterOwnAndChildLists(e)
             }}
             onBlur={onBlur}
           />
-          <ListGroup className='d-none select'>
+          {isListOpen ? (
+          <ListGroup className='select'>
             {this.state.list.map(listItem => 
               <ListGroupItem 
                 key={listItem} 
@@ -113,6 +126,7 @@ class DropdownInputLabelWithChildList extends Component {
               </ListGroupItem>
             )}
           </ListGroup>
+          ) : (null) }
         </FormGroup>
         <DropdownInputLabelChildList 
           name={childName}

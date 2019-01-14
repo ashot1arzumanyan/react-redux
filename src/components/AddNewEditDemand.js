@@ -1,12 +1,10 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import moment from 'moment'
 import { Col, Form, FormGroup, Button, Input, Label, Collapse } from 'reactstrap'
 
 import DemandItem from './demand/DemandItem'
 import units from '../constants/units'
 import InputWithJumperLabel from '../helpers/InputWithJumperLabel'
-import DropdownInputWithJumperLabel from '../helpers/DropdownInputWithJumperLabel'
 import YearPicker from './datePickers/YearPicker'
 import MonthPicker from './datePickers/MonthPicker'
 import DayPicker from './datePickers/DayPicker'
@@ -15,6 +13,8 @@ import InputLabel from './inputs/InputLabel'
 import DropdownInputLabel from './inputs/DropdownInputLabel'
 import DropdownListItemWithJumperLabel from '../helpers/DropdownListItemWithJumperLabel'
 import FilterForm from './inputs/FilterForm'
+import { Validator, validate, validateAll} from '../helpers/Validator'
+import ButtonContent from './ButtonContent'
 
 class AddNewEditDemand extends Component {
 
@@ -24,9 +24,10 @@ class AddNewEditDemand extends Component {
       price: '',
       unit: '',
       quantity: '',
-      yourName: '',
+      username: '',
       email: '',
       phone: '',
+      description_one_word: '',
       comment: '',
       year: '',
       month: '',
@@ -45,7 +46,7 @@ class AddNewEditDemand extends Component {
         price: false,
         unit: false,
         quantity: false,
-        yourName: false,
+        username: false,
         email: false,
         phone: false,
         comment: false,
@@ -56,7 +57,7 @@ class AddNewEditDemand extends Component {
         price: '',
         unit: '',
         quantity: '',
-        yourName: '',
+        username: '',
         email: '',
         phone: '',
         comment: '',
@@ -66,27 +67,27 @@ class AddNewEditDemand extends Component {
     this.handleFocusOnInput = this.handleFocusOnInput.bind(this)
     this.handleBlurOnInput = this.handleBlurOnInput.bind(this)
     this.handleInputOnInput = this.handleInputOnInput.bind(this)
-    this.handleFocusOnDropdownInput = this.handleFocusOnDropdownInput.bind(this)
     this.handleClickOnDropdownListItem = this.handleClickOnDropdownListItem.bind(this)
     this.handleBlurOnDropdownListItem = this.handleBlurOnDropdownListItem.bind(this)
     this.toggleIsMarkTheDate = this.toggleIsMarkTheDate.bind(this)
     this.clickOnRadio = this.clickOnRadio.bind(this)
     this.clickOnRadioContinuousType = this.clickOnRadioContinuousType.bind(this)
-    this.validateAll = this.validateAll.bind(this)
-    this.validate = this.validate.bind(this)
     this.setNameValue = this.setNameValue.bind(this)
+    this.Validator = new Validator(this.props.cFF)
+    this.validate = validate.bind(this)
+    this.validateAll = validateAll.bind(this)
   }
 
   componentDidMount() {
     if (this.props.editMode) {
-
       const demand = this.props.demand
-      
       const price = demand.price, 
       unit = demand.unit, 
       quantity = demand.quantity, 
+      username = demand.username,
       email = demand.email ? demand.email : '', 
       phone = demand.phone ? demand.phone : '', 
+      description_one_word = demand.description_one_word ? demand.description_one_word : '',
       comment = demand.comment ? demand.comment : '', 
       year = demand.is_mark_the_date ? demand.year : '', 
       month = demand.is_mark_the_date ? demand.month : '', 
@@ -105,9 +106,11 @@ class AddNewEditDemand extends Component {
         price: price, 
         unit: unit, 
         quantity: quantity, 
+        username: username,
         email: email, 
         phone: phone, 
         comment: comment, 
+        description_one_word: description_one_word,
         year: year, 
         month: month, 
         day: day, 
@@ -127,13 +130,13 @@ class AddNewEditDemand extends Component {
       
       const form = document.querySelector('form.add_demand');
 
-      function doJump(input) {
-        const parent = input.parentElement
-        parent.classList.add('jump')
-        parent.classList.remove('jumpCancel')
+      const doJump = (input) => {
+        const label = input.previousElementSibling
+        label.classList.add('jump')
+        label.classList.remove('jumpCancel')
       }
 
-      function addValuesFor(nameValues = []) {
+      const addValuesFor = (nameValues = []) => {
         nameValues.forEach(nameValu => {
           const input = form.querySelector(`#${nameValu.name}`)
           input.value = [nameValu.value]
@@ -143,10 +146,11 @@ class AddNewEditDemand extends Component {
 
       const nameValues = [
         { name: 'price', value: price },
-        { name: 'quantity', value: quantity }        
+        { name: 'quantity', value: quantity },
+        { name: 'username', value: username }      
       ]
 
-      function checkAndAddToNameValues(name, value) {
+      const checkAndAddToNameValues = (name, value) => {
         if (value) {
           nameValues.push( { name: name, value: value } )
         }
@@ -155,6 +159,7 @@ class AddNewEditDemand extends Component {
       checkAndAddToNameValues('email', email)
       checkAndAddToNameValues('phone', phone)
       checkAndAddToNameValues('comment', comment)
+      checkAndAddToNameValues('description_one_word', description_one_word)
       checkAndAddToNameValues('year', year)
       checkAndAddToNameValues('month', month)
       checkAndAddToNameValues('day', day)
@@ -182,7 +187,7 @@ class AddNewEditDemand extends Component {
 
       const input = form.querySelector('#unit')
       input.dataset.en = unit
-      input.value = this.props.common.units[unit]
+      input.value = this.props.cFF.units[unit]
       doJump(input)
 
       if (continuous) { 
@@ -267,6 +272,13 @@ class AddNewEditDemand extends Component {
   handleFocusOnInput(e) {
     const input = new InputWithJumperLabel(e)
     input.focus()
+    const { name, value } = input.getNameValue()
+    if(name === 'username' || name === 'email' || name === 'phone') {
+      if (this.props.user[name] && !value) {
+        this.setNameValue(name, this.props.user[name])
+        input.setValue(this.props.user[name])
+      }
+    }
   }
 
   handleBlurOnInput(e) {
@@ -287,31 +299,22 @@ class AddNewEditDemand extends Component {
     this.setNameValue(name, datasetEn || value)
   }
 
-  handleFocusOnDropdownInput(e) {
-    const input = new DropdownInputWithJumperLabel(e)
-    input.focus()
-  }
-
   handleClickOnDropdownListItem(e) {
     const listItem = new DropdownListItemWithJumperLabel(e)
     listItem.click()
-    const input = listItem.getInput()
-    this.setIsInvalidMsgByNameToEmpty(input.name)
   }
 
   handleBlurOnDropdownListItem(e) {
     const input = new InputWithJumperLabel(e)
-    if (input.checkListIsClosed()) {
-      const { name, value } = input.getNameValue()
-      this.setIsBlurredTrue(name)
-      this.validate(name, value)
-    }
+    const { name, value } = input.getNameValue()
+    this.setIsBlurredTrue(name)
+    this.validate(name, value)
   }  
 
   onSubmit(e) {
     e.preventDefault()
     const hasInvalidMsg = this.validateAll()
-    if (!hasInvalidMsg) {
+    if (!hasInvalidMsg && !this.props.isFetchingAddNew) {
       const { isBlurred, isInvalidMsg, ...demand } = this.state
       this.props.submit(demand)
     }  
@@ -321,12 +324,6 @@ class AddNewEditDemand extends Component {
     const isBlurred = { ...this.state.isBlurred }
     isBlurred[name] = true
     this.setState({ isBlurred: isBlurred })
-  }
-
-  setIsInvalidMsgByNameToEmpty(name) {
-    const isInvalidMsg = { ...this.state.isInvalidMsg }
-    isInvalidMsg[name] = ''
-    this.setState({ isInvalidMsg: isInvalidMsg })
   }
 
   setNameValue(name, value) {
@@ -339,7 +336,6 @@ class AddNewEditDemand extends Component {
 
     const { isBlurred, isInvalidMsg, ...demand } = this.state
     const { common, isFetchingAddNew } = this.props
-
     const commonPropsForInput = {
       onFocus: this.handleFocusOnInput,
       onBlur: this.handleBlurOnInput,
@@ -349,7 +345,6 @@ class AddNewEditDemand extends Component {
     }
 
     const commonPropsForDropdownInput = {
-      onFocus: this.handleFocusOnDropdownInput,
       onClick: this.handleClickOnDropdownListItem,
       onBlur: this.handleBlurOnDropdownListItem,
       onInput: this.handleInputOnInput,
@@ -362,7 +357,6 @@ class AddNewEditDemand extends Component {
 
       <Form className='add_demand'>
         <FilterForm 
-          onFocus={this.handleFocusOnDropdownInput}
           onClick={this.handleClickOnDropdownListItem}
           onBlur={this.handleBlurOnDropdownListItem}
           onInput={this.handleInputOnInput}
@@ -433,9 +427,12 @@ class AddNewEditDemand extends Component {
                     />
                     <MonthPicker 
                       commonProps={commonPropsForDropdownInput}
+                      year={this.state.year}
                     />
                     <DayPicker 
-                      commonProps={commonPropsForDropdownInput}
+                      onBlur={this.handleBlurOnDropdownListItem}
+                      onInput={this.handleInputOnInput}
+                      onClick={this.handleClickOnDropdownListItem}
                       year={this.state.year}
                       month={this.state.month}
                     />
@@ -450,7 +447,7 @@ class AddNewEditDemand extends Component {
                 />
               </FormGroup>
               <InputLabel
-                name='yourName' 
+                name='username' 
                 type='text'
                 commonProps={commonPropsForInput}
               />
@@ -465,14 +462,21 @@ class AddNewEditDemand extends Component {
                 commonProps={commonPropsForInput}
               />
               <InputLabel
+                name='description_one_word' 
+                type='text'
+                commonProps={commonPropsForInput}
+              />
+              <InputLabel
                 name='comment' 
                 type='textarea'
                 commonProps={commonPropsForInput}
               />
               <Button 
-                disabled={isFetchingAddNew}
                 onClick={e => this.onSubmit(e)}>
-                {common.add}
+                <ButtonContent 
+                  isFetching={isFetchingAddNew}
+                  content={common.add}
+                />
               </Button>
             </Col>
           </div>
@@ -480,41 +484,14 @@ class AddNewEditDemand extends Component {
             <div className='Demand proposal_demand_container position-fixed'>
               <DemandItem 
                 demand={demand} 
+                common={common}
+                addNewMode={true}
               />
             </div>
           </div>
         </div>
       </Form>
     )
-  }
-
-  validateAll() {
-    const isBlurred = { ...this.state.isBlurred }
-    let entries = []
-    let input
-    const names = Object.keys(isBlurred)
-    names.forEach(name => {
-      isBlurred[name] = true 
-      input = document.getElementById(name)
-      entries.push({ name: name, value: input.value })
-    })
-    const isInvalidMsg = this.msgCreator(entries)
-    this.setState({
-      isBlurred: isBlurred,
-      isInvalidMsg: isInvalidMsg
-    })
-    let hasInvalidMsg = false
-    names.forEach(name => {
-      if (!hasInvalidMsg && isInvalidMsg[name] !== '') {
-        hasInvalidMsg = true
-      }
-    })
-    return hasInvalidMsg
-  }
-
-  validate(name, value) {
-    const isInvalidMsg = this.msgCreator([{ name: name, value: value }])
-    this.setState({ isInvalidMsg: isInvalidMsg })
   }
 
   msgCreator(entries = []) {
@@ -529,33 +506,33 @@ class AddNewEditDemand extends Component {
       value = entry.value.trim().toLowerCase();
       switch (name) {
         case 'city':
-          isInvalidMsg[name] = this.checkCity(value);
+          isInvalidMsg[name] = this.Validator.checkCity(value);
           break;
           
         case 'subType':
-          isInvalidMsg[name] = this.checkSubType(value);
+          isInvalidMsg[name] = this.Validator.checkSubType(value);
           break;
           
         case 'price':
-          isInvalidMsg[name] = this.checkPrice(value);
+          isInvalidMsg[name] = this.Validator.checkIsNotEmpty(value);
           break;
   
         case 'unit':
-          isInvalidMsg[name] = this.checkUnit(value);
+          isInvalidMsg[name] = this.Validator.checkUnit(value);
           break;
   
         case 'quantity':
-          isInvalidMsg[name] = this.checkQuantity(value);
+          isInvalidMsg[name] = this.Validator.checkIsNotEmpty(value);
           break;
 
-        case 'yourName':
-          isInvalidMsg[name] = this.checkYourName(value);
+        case 'username':
+          isInvalidMsg[name] = this.Validator.checkUsername(value);
           break;
   
         case 'email':
           const phone = document.querySelector('input[name="phone"]');
-          emailMsg = this.checkEmail(value);
-          phoneMsg = this.checkPhone(phone.value);
+          emailMsg = this.Validator.checkEmail(value);
+          phoneMsg = this.Validator.checkIsNotEmpty(phone.value);
           if (emailMsg === '' || phoneMsg === '') {
             isInvalidMsg.phone = '';
             isInvalidMsg[name] = '';
@@ -563,14 +540,14 @@ class AddNewEditDemand extends Component {
             isInvalidMsg[name] = emailMsg;
             isBlurred.phone = true;
             this.setState({isBlurred: isBlurred})
-            isInvalidMsg.phone = 'Phone or Email should not be empty';
+            isInvalidMsg.phone = 'email_or_phone_not_empty';
           }
           break;
   
         case 'phone':
           const email = document.querySelector('input[name="email"]');
-          phoneMsg = this.checkPhone(value);
-          emailMsg = this.checkEmail(email.value);
+          phoneMsg = this.Validator.checkIsNotEmpty(value);
+          emailMsg = this.Validator.checkEmail(email.value);
           if (phoneMsg === '' || emailMsg === '') {
             isInvalidMsg[name] = '';
             isInvalidMsg.email = '';
@@ -578,166 +555,34 @@ class AddNewEditDemand extends Component {
             isInvalidMsg[name] = phoneMsg;
             isBlurred.email = true;
             this.setState({isBlurred: isBlurred})
-            isInvalidMsg.email = 'Email or Phone should not be empty'
+            isInvalidMsg.email = 'email_or_phone_not_empty'
           }
           break;
-  
+          
+        case 'description_one_word':
+          isInvalidMsg[name] = this.Validator.checkDescriptionOneWord(value);
+          break;
+
         case 'comment':
-          isInvalidMsg[name] = this.checkComment(value);
+          isInvalidMsg[name] = this.Validator.checkComment(value);
           break;
 
         case 'frequencyNum':
-          isInvalidMsg[name] = this.checkFrequencyNum(value)
+          isInvalidMsg[name] = this.Validator.checkFrequencyNum(value, this.state.continuousType)
           break;
 
         case 'month':
-          isInvalidMsg[name] = this.checkMonth(value)
-          break;
+          isInvalidMsg[name] = this.Validator.checkMonth(value)
+          break
         
         case 'year': 
-          isInvalidMsg[name] = this.checkYear(value)
+          isInvalidMsg[name] = this.Validator.checkYear(value)
+          break
+        default:
+          return isInvalidMsg;
       }
     })
     return isInvalidMsg
-  }
-
-  checkCity(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'City field most be chose from on of the opened list above'
-      return msg
-    }
-    const cities = Object.values(this.props.cFF.cities).map(value => value.toLowerCase());
-    if (cities.indexOf(value) === -1) {
-      msg = 'City field most be chose from on of the opened list above'
-    }
-    return msg;
-  }
-
-  checkSubType(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'subType field most be chose from on of the opened list above'
-      return msg
-    }
-    const subTypes = Object.values(this.props.cFF.subTypes).map(value => value.toLowerCase());
-    if (subTypes.indexOf(value) === -1) {
-      msg = 'subType field most be chose from on of the opened list above'
-    }
-    return msg;
-  }
-
-  checkUnit(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'Unit should not be empty and most be chose from on of the opened list above'
-    }
-    const units = Object.values(this.props.common.units);
-    if (units.indexOf(value) === -1) {
-      msg = 'Unit most be chose from on of the opened list above'
-    }
-    return msg;
-  }
-
-  checkPrice(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'Price should not be empty'
-    }
-    return msg;
-  }
-
-  checkQuantity(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'Available quantity should not be empty'
-    }
-    return msg;
-  }
-
-  checkYourName(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'Your Name field should not be empty'
-    }
-    return msg;
-  }
-
-  checkEmail(value) {
-    let msg = '';
-    const emailRe = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    if (value === '') {
-      msg = 'Email or Phone should not be empty';
-    } else if (!emailRe.test(value)) {
-      msg = 'Email is not correct';
-    }
-    return msg
-  }
-
-  checkPhone(value) {
-    let msg = '';
-    if (value === '') {
-      msg = 'Phone should not be empty';
-    } 
-    return msg
-  }
-
-  checkComment(value) {
-    let msg = '';
-    if (value.length > 199) {
-      msg = 'This is a maximum size';
-    } 
-    return msg
-  }
-
-  checkFrequencyNum(value) {
-    let msg = '';
-    if (value === '') {
-      msg = '???? should not be empty and most be chose from on of the opened list above'
-      return msg
-    }
-    const continuousType = this.state.continuousType
-    let values = []
-    if (continuousType ==='day') {
-      values = ['1', '2', '3', '4', '5', '6']
-    } else if (continuousType === 'week') {
-      values = ['1', '2', '3']
-    } else {
-      values = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
-    }
-    if (values.indexOf(value) === -1) {
-      msg = '??? most be chose from on of the opened list above'
-    }
-    return msg
-  }
-
-  checkMonth(value) {
-    let msg = ''
-    if (value === '') {
-      return msg = 'Month field should not be empty'
-    }
-    const months = moment().localeData().months()
-    const numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
-    if (numbers.indexOf(value) === -1 && months.indexOf(value) === -1) {
-      msg = 'Ամիս դաշտը պետք է ընտրված լինի ներքևում բացված ցուցակից կամ դրան համապատասխան թիվ մուտքագրվի'
-    }
-    return msg 
-  }
-
-  checkYear(value) {
-    let msg = ''
-    if (value === '') {
-      return msg = 'Year field should not be empty'
-    }
-    const currentYear = new Date().getFullYear();
-    const years = []
-    for (let year = currentYear; year < currentYear + 31; year++) {
-      years.push(String(year))
-    }
-    if (years.indexOf(value) === -1) {
-      msg = 'Տարի դաշտը պետք է համապատասխանի ներքևում բացված ցուցակի որևե անդամի հետ'
-    }
-    return msg
   }
 
 }
@@ -746,8 +591,8 @@ const mapStateToProps = (state) => {
   return{
     common: state.content.common,
     cFF: state.content.Filter,
-    email: state.user.email,
-    isFetchingAddNew: state.demands.isFetchingAddNew,
+    user: state.user,
+    isFetchingAddNew: state.demands.descriptions.isFetchingAddNew,
   }
 }
 

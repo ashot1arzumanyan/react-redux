@@ -1,5 +1,9 @@
 const regions_cities = [
     {
+      city: "erevan",
+      region: "erevan"
+    },
+    {
       city: "ashtarak",
       region: "aragacotn"
     },

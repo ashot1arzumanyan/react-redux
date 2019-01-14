@@ -3,7 +3,8 @@ import { connect } from 'react-redux'
 import { FormGroup, Label, Input, Form, Button } from 'reactstrap'
 
 import InputWithJumperLabel from '../helpers/InputWithJumperLabel'
-import { startSendEmail, resetPasswordSendEmail } from '../actions/resetPasswordSendEmailAction'
+import resetPasswordSendEmail from '../actions/resetPasswordSendEmailAction'
+import ButtonContent from './ButtonContent'
 
 class SendVerificationCode extends Component {
 
@@ -25,11 +26,13 @@ class SendVerificationCode extends Component {
   }
 
   handleOnInput(e) {
-    const name = e.target.name;
-    const value = e.target.value;
-    this.setState({
-      [name]: value
-    })
+    if (!this.props.isFetching) {
+      const name = e.target.name;
+      const value = e.target.value;
+      this.setState({
+        [name]: value
+      })
+    }
   }
 
   handleOnFocus(e) {
@@ -44,22 +47,12 @@ class SendVerificationCode extends Component {
 
   handleSendEmail(e) {
     e.preventDefault()
-    this.props.startSendEmail()
     this.props.resetPasswordSendEmail({ email: this.state.email })
   }
 
   render() {
 
     const { common } = this.props
-    const { isBlurred, isInvalidMsg } = this.state
-
-    // const commonProps = {
-    //   onFocus: this.handleOnFocus,
-    //   onBlur: this.handleOnBlur,
-    //   onInput: this.handleOnInput,
-    //   isBlurred: isBlurred,
-    //   isInvalidMsg: isInvalidMsg
-    // }
 
     return (
       <div className='d-flex flex-column align-items-center'>
@@ -75,11 +68,16 @@ class SendVerificationCode extends Component {
               onFocus={this.handleOnFocus}
             />
           </FormGroup>
-          <Button
-            onClick={this.handleSendEmail}
-            >
-            Send Verification code
-          </Button>
+          <div className='d-flex justify-content-center position-relative mt-4'>
+            <Button
+              onClick={this.handleSendEmail}
+              >
+              <ButtonContent 
+                isFetching={this.props.isFetching}
+                content={common.send_instruction}
+              />
+            </Button>
+          </div>
         </Form>
       </div>
     ) 
@@ -89,7 +87,8 @@ class SendVerificationCode extends Component {
 const mapstateToProps = (state) => {
   return {
     common: state.content.common,
+    isFetching: state.isFetchings.isFetching
   }
 }
 
-export default connect(mapstateToProps, {startSendEmail, resetPasswordSendEmail})(SendVerificationCode)
+export default connect(mapstateToProps, { resetPasswordSendEmail})(SendVerificationCode)

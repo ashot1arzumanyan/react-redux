@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 
 import CityMiddleProposalDeamndItem from '../proposalDemandCommon/CityMiddleProposalDeamndItem'
 import VerticalDivider from '../proposalDemandCommon/VerticalDivider'
@@ -6,55 +6,57 @@ import MarkDateMiddleDemandItem from './MarkDateMiddleDemandItem'
 import ContinuousMiddleDeamndItem from './ContinuousMiddleDeamndItem'
 import QuantityMiddleDemandItem from './QuantityMiddleDemandItem'
 
-class MiddleDemandItem extends Component {
+const QuntityDateView = (props) => {
+      
+  if (props.demand.oneTime && props.demand.is_mark_the_date) {
+
+    const { year, month } = props.demand
+    const day = 'day' in props.demand ? props.demand.day : ''
+    return (
+      <MarkDateMiddleDemandItem 
+        year={year}
+        month={month}
+        day={day}
+        quantity={props.demand.quantity}
+        common={props.common}
+      />
+    )
+
+  } else if(props.demand.continuous) {
+
+    return (
+      <ContinuousMiddleDeamndItem 
+        continuousType={props.demand.continuousType}
+        frequencyNum={props.demand.frequencyNum}
+        quantity={props.demand.quantity}
+        common={props.common}
+      />
+    )
+
+  } else {
+
+    return (
+      <QuantityMiddleDemandItem 
+        quantity={props.demand.quantity}
+        content={props.common.quantity}
+      />
+    )
+  }
+}
+
+class MiddleDemandItem extends PureComponent {
 
   render() {
-
-    const { demand, demand: { quantity, oneTime, is_mark_the_date, continuous, city } } = this.props
-    const QuntityDateView = () => {
-      
-      if (oneTime && is_mark_the_date) {
-
-        const { year, month } = demand
-        const day = 'day' in demand ? demand.day : ''
-        return (
-          <MarkDateMiddleDemandItem 
-            year={year}
-            month={month}
-            day={day}
-            quantity={quantity}
-          />
-        )
-
-      } else if(continuous) {
-
-        const { continuousType, frequencyNum } = demand
-        return (
-          <ContinuousMiddleDeamndItem 
-            continuousType={continuousType}
-            frequencyNum={frequencyNum}
-            quantity={quantity}
-          />
-        )
-
-      } else {
-
-        return (
-          <QuantityMiddleDemandItem 
-            quantity={quantity}
-          />
-        )
-      }
-    }
 
     return (
       <div className='d-flex justify-content-around' style={{height: '57px'}}>
         <CityMiddleProposalDeamndItem 
-          city={city}
+          city={this.props.demand.city}
         />
         <VerticalDivider />
         <QuntityDateView 
-        
+          demand={this.props.demand}
+          common={this.props.common}
         />
       </div>
     )

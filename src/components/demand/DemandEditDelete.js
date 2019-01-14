@@ -5,6 +5,7 @@ import EditDelete from '../proposalDemandCommon/EditDelete'
 import getDemandsByIdAction from '../../actions/getDemandsByIdAction'
 import DemandItem from './DemandItem'
 import deleteDemandAction from '../../actions/deleteDemandAction'
+import LoadingButtonSpiner from '../LoadingButtonSpiner'
 
 class DemandEditDelete extends Component {
   
@@ -16,8 +17,7 @@ class DemandEditDelete extends Component {
   }
 
   componentDidMount() {
-    const _id = this.props.user._id
-    this.props.getDemandsByIdAction(_id)
+    this.props.getDemandsByIdAction()
   }
 
   handleDelete(id) {
@@ -35,25 +35,29 @@ class DemandEditDelete extends Component {
   }
 
   render() {
-    
-    const { demandsById } = this.props
-    
+        
     return (
       <Fragment>
-        { demandsById.map((demand, i) =>
+        { this.props.demandsById.map((demand) =>
           <div
             className='position-relative Demand mb-5 mt-3'
             data-id={demand._id}
-            key={i}>
+            key={demand._id}>
             <EditDelete 
               delete={this.handleDelete}
               edit={this.handleEdit}
             />
             <DemandItem
-              demand={demand}            
+              demand={demand}
+              common={this.props.common}        
             />
           </div>
-        )}         
+        )}   
+        {this.props.isFetching ? (
+          <div className='position-relative mt-3'>
+            <LoadingButtonSpiner />
+          </div>
+        ) : null}      
       </Fragment>
     )
   }
@@ -61,8 +65,9 @@ class DemandEditDelete extends Component {
 
 const mapstateToProps = (state) => {
   return {
-    user: state.user,
-    demandsById: state.demandsById.demandsById
+    demandsById: state.demandsById.demandsById,
+    isFetching: state.demandsById.isFetching,
+    common: state.content.common
   }
 }
 

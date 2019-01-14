@@ -2,14 +2,20 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { FormGroup, Label, Input, ListGroup, ListGroupItem, FormFeedback } from 'reactstrap'
 
+import DropdownInputWithJumperLabelFocus from '../../helpers/DropdownInputWithJumperLabelFocus'
+
 class ContinuousDatePicker extends Component {
 
   constructor(props) {
     super(props)
     this.frequencyNums = []
     this.state = {
-      lastNumber: 6
+      lastNumber: 6,
+      isListOpen: false,
+      isInputHasValue: false
     }
+
+    this.DropdownInputWithJumperLabelFocus = DropdownInputWithJumperLabelFocus.bind(this)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -35,9 +41,9 @@ class ContinuousDatePicker extends Component {
 
   render() {
     
-    const { common, onClickOnRadioContinuousType, continuousType, commonProps: { onFocus, onBlur, onInput, onClick, isBlurred, isInvalidMsg } } = this.props
-
-    const frequencyNums = this.generateFrequencyNums(this.state.lastNumber)
+    const { common, warningMsgs, onClickOnRadioContinuousType, continuousType, commonProps: { onBlur, onInput, onClick, isBlurred, isInvalidMsg } } = this.props
+    const { isListOpen, isInputHasValue, lastNumber } = this.state
+    const frequencyNums = this.generateFrequencyNums(lastNumber)
 
     return ( 
       <React.Fragment>
@@ -78,27 +84,35 @@ class ContinuousDatePicker extends Component {
           </FormGroup>
         </FormGroup>
         <FormGroup className='jumperLabel' style={{maxWidth: '30%'}}>
-          <Label for='frequencyNum'>{common[continuousType]}</Label>
+          <Label 
+            for='frequencyNum'
+            className={isInputHasValue ? 'jump' : 'jumpCancel'}>
+            {common[continuousType]}
+          </Label>
           <Input 
             id='frequencyNum'
             type="text" 
             name="frequencyNum"
-            onFocus={onFocus}
+            tabIndex='-1'
+            autoComplete="off"
+            onFocus={this.DropdownInputWithJumperLabelFocus}
             onInput={onInput}
             onBlur={onBlur}
             valid = { isBlurred.frequencyNum && isInvalidMsg.frequencyNum === '' }
             invalid = { isBlurred.frequencyNum && isInvalidMsg.frequencyNum !== '' }
           />
-          <FormFeedback>{ isInvalidMsg.frequencyNum }</FormFeedback>
-          <ListGroup className='d-none select'>
-            {frequencyNums.map(frequencyNum => 
-              <ListGroupItem 
-                key={frequencyNum} 
-                onClick={onClick}>
-                {frequencyNum}
-              </ListGroupItem>
-            )}
-          </ListGroup>
+          <FormFeedback>{ warningMsgs[isInvalidMsg.frequencyNum] }</FormFeedback>
+          {isListOpen ? (
+            <ListGroup className='select'>
+              {frequencyNums.map(frequencyNum => 
+                <ListGroupItem 
+                  key={frequencyNum} 
+                  onClick={onClick}>
+                  {frequencyNum}
+                </ListGroupItem>
+              )}
+            </ListGroup>
+          ) : (null)}
         </FormGroup>
       </React.Fragment>
     )
@@ -108,6 +122,7 @@ class ContinuousDatePicker extends Component {
 const mapStateToProps = (state) => {
   return {
     common: state.content.common,
+    warningMsgs: state.content.warningMsgs
   }
 }
 

@@ -1,78 +1,100 @@
-function Mouse (e) {
-    this.e = e
-}
+// function Mouse (e) {
+//     this.e = e
+// }
 
-Mouse.prototype.getXY = function getXY() {
-    const m_posx = this.e.pageX, 
-    m_posy = this.e.pageY - window.scrollY, 
-    rect = this.e.target.getBoundingClientRect(),
-    e_posx = rect.left, 
-    e_posy = rect.top;
-
+const getXY = (e) => {
+    const rect = e.target.getBoundingClientRect();
     return {
-        x: Math.ceil(m_posx - e_posx),
-        y: Math.ceil(m_posy - e_posy)
+        x: e.pageX - rect.left,
+        y: e.pageY - window.scrollY - rect.top
     }
 }
+
+// function copyEmailToClipBoard() {
+//     const email = 'proposal' in this.props ? this.props.proposal.email : this.props.demand.email
+//     if (!!email) {
+//         const el = document.createElement('textarea');
+//         el.value = email
+//         document.body.appendChild(el)
+//         el.select()
+//         document.execCommand('copy', true)
+//         document.body.removeChild(el)
+//     }
+// }
 
 function openContacts (e) {
     e.stopPropagation()
     e.preventDefault()
     if (this.state.isContactsOpen) {
+        // copyEmailToClipBoard.call(this)
         return
     }
     this.isMouseMove = false
+    const { x, y } = getXY(e)
+    if (this.state.isReadMore && y > 155 && x < 300) {
+        this.setState({ modal: true })
+        this.node.current.style.boxShadow = '0px 0px 10px 2px rgb(193, 193, 193)';
+        this.node.current.style.transform = 'rotateX(0deg) rotateY(0deg)'
+        return;
+    }
     setTimeout(() => {
-    this.setState({ isContactsOpen: true })
+        this.setState({ isContactsOpen: true })
     }, 250);
-    const { x, y } = new Mouse(e).getXY()
     if (x < this.x_1_3) {
-        this.card.style.transform = 'rotateY(-180deg)'
+        this.node.current.style.transform = 'rotateY(-180deg)'
         setTimeout(() => {
-          this.card.querySelector('.Contacts').style.transform = 'rotateY(180deg)'
+            this.node.current.querySelector('.Contacts').style.transform = 'rotateY(180deg)'
         }, 250);
     } else if (x > (this.x_1_3 * 2)) {
-        this.card.style.transform = 'rotateY(180deg)'
+        this.node.current.style.transform = 'rotateY(180deg)'
         setTimeout(() => {
-            this.card.querySelector('.Contacts').style.transform = 'rotateY(-180deg)'
+            this.node.current.querySelector('.Contacts').style.transform = 'rotateY(-180deg)'
         }, 250);
     } else {
         if (y < this.y_1_2) {
-            this.card.style.transform = 'rotateX(180deg)'
+            this.node.current.style.transform = 'rotateX(180deg)'
             setTimeout(() => {
-                this.card.querySelector('.Contacts').style.transform = 'rotateX(-180deg)'
+                this.node.current.querySelector('.Contacts').style.transform = 'rotateX(-180deg)'
             }, 250);
         } else {
-            this.card.style.transform = 'rotateX(-180deg)'
+            this.node.current.style.transform = 'rotateX(-180deg)'
             setTimeout(() => {
-                this.card.querySelector('.Contacts').style.transform = 'rotateX(-180deg)'
+                this.node.current.querySelector('.Contacts').style.transform = 'rotateX(-180deg)'
             }, 250);
         }
     }
-    this.card.style.boxShadow = '0px 0px 10px 2px rgb(193, 193, 193)';
+    this.node.current.style.boxShadow = '0px 0px 10px 2px rgb(193, 193, 193)'; 
 }
 
 function mouseMoveOverStatement(e) {
     e.stopPropagation()
     e.preventDefault()
-    const { x, y } = new Mouse(e).getXY()
+    const { x, y } = getXY(e)
+    // console.log('x:  ' + x);
+    // console.log('y:  ' + y);
     if (x < this.x_1_3) {
-      this.card.style.transform = 'rotateY(7deg)'
-      this.card.style.boxShadow = '-3px 0px 10px 2px rgb(193, 193, 193)';
+      this.node.current.style.transform = 'rotateY(7deg)'
+      this.node.current.style.boxShadow = '-3px 0px 10px 2px rgb(193, 193, 193)';
     } else if (x > (this.x_1_3 * 2)) {
-      this.card.style.boxShadow = '3px 0px 10px 2px rgb(193, 193, 193)';
-      this.card.style.transform = 'rotateY(-7deg)'
+      this.node.current.style.boxShadow = '3px 0px 10px 2px rgb(193, 193, 193)';
+      this.node.current.style.transform = 'rotateY(-7deg)'
     } else {
       if (y < this.y_1_3) {
-        this.card.style.transform = 'rotateX(-7deg)'
-        this.card.style.boxShadow = '0px -2px 10px 2px rgb(193, 193, 193)';
+        this.node.current.style.transform = 'rotateX(-7deg)'
+        this.node.current.style.boxShadow = '0px -2px 10px 2px rgb(193, 193, 193)';
       } else if (y > (this.y_1_3 * 2)) {
-        this.card.style.transform = 'rotateX(7deg)'
-        this.card.style.boxShadow = '0px 3px 10px 2px rgb(193, 193, 193)';
+        this.node.current.style.transform = 'rotateX(7deg)'
+        this.node.current.style.boxShadow = '0px 3px 10px 2px rgb(193, 193, 193)';
       } else {
-        this.card.style.transform = 'rotateX(0deg) rotateY(0deg)'
-        this.card.style.boxShadow = '0px 0px 10px 2px rgb(193, 193, 193)';
+        this.node.current.style.transform = 'rotateX(0deg) rotateY(0deg)'
+        this.node.current.style.boxShadow = '0px 0px 10px 2px rgb(193, 193, 193)';
       }
+    }
+    if (y > 166 && x > 30 && x < 250) {
+        const btn = this.node.current.querySelector('button.read_more')
+        if(btn) {
+            btn.style.left = x - (btn.offsetWidth / 2) + 'px'
+        }
     }
 }
 

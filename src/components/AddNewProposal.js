@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-import { startAddNewProposalAction, addNewProposalAction } from '../actions/addNewProposalAction'
+import addNewProposalAction from '../actions/addNewProposalAction'
 import AddNewEditProposal from './AddNewEditProposal'
 
 class AddNewProposal extends Component {
@@ -13,8 +13,7 @@ class AddNewProposal extends Component {
   }
 
   handleSubmit(proposal) {
-    const { startAddNewProposalAction, addNewProposalAction, history } = this.props
-    startAddNewProposalAction()
+    const { addNewProposalAction, history } = this.props
     addNewProposalAction(proposal, () => {
       history.push('/')
     })
@@ -31,11 +30,5 @@ class AddNewProposal extends Component {
   }
 
 }
-const mapStateToProps = (state) => {
-  return {
-    startAddNewProposalAction: state.startAddNewProposalAction,
-    addNewProposalAction: state.addNewProposalAction
-  }
-}
 
-export default connect(mapStateToProps, { startAddNewProposalAction, addNewProposalAction })(AddNewProposal)
+export default connect(null, { addNewProposalAction })(AddNewProposal)

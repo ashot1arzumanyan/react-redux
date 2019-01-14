@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { FormGroup, Label, Input, ListGroup, ListGroupItem, FormFeedback } from 'reactstrap'
 
 import InputWithJumperLabel from '../../helpers/InputWithJumperLabel'
+import DropdownInputWithJumperLabelFocus from '../../helpers/DropdownInputWithJumperLabelFocus'
 
 class YearPicker extends Component {
 
@@ -10,8 +11,12 @@ class YearPicker extends Component {
     super(props)
     this.list = []
     this.state = {
-      list: []
+      list: [],
+      isListOpen: false,
+      isInputHasValue: false
     }
+
+    this.DropdownInputWithJumperLabelFocus = DropdownInputWithJumperLabelFocus.bind(this)
   }
 
   componentDidMount() {
@@ -35,16 +40,23 @@ class YearPicker extends Component {
 
   render() {
     
-    const { common, commonProps: { onFocus, onBlur, onInput, onClick, isBlurred, isInvalidMsg } } = this.props
+    const { common, warningMsgs, commonProps: { onBlur, onInput, onClick, isBlurred, isInvalidMsg } } = this.props
+    const { isListOpen, isInputHasValue } = this.state
 
     return ( 
       <FormGroup className='jumperLabel mr-5'>
-        <Label for='year'>{common.year}</Label>
+        <Label 
+          for='year'
+          className={isInputHasValue ? 'jump' : 'jumpCancel'}>
+          {common.year}
+        </Label>
         <Input 
           id='year'
           type="text" 
           name="year"
-          onFocus={onFocus}
+          tabIndex='-1'
+          autoComplete="off"
+          onFocus={this.DropdownInputWithJumperLabelFocus}
           onInput={(e) => {
             onInput(e)
             this.onInputFilterList(e)
@@ -53,16 +65,18 @@ class YearPicker extends Component {
           valid = { isBlurred.year && isInvalidMsg.year === '' }
           invalid = { isBlurred.year && isInvalidMsg.year !== '' }
         />
-        <FormFeedback>{ isInvalidMsg.year }</FormFeedback>
-        <ListGroup className='d-none select'>
-          {this.state.list.map(year => 
-            <ListGroupItem 
-              key={year} 
-              onClick={onClick}>
-              {year}
-            </ListGroupItem>
-          )}
-        </ListGroup>
+        <FormFeedback>{ warningMsgs[isInvalidMsg.year] }</FormFeedback>
+        {isListOpen ? (
+          <ListGroup className='select'>
+            {this.state.list.map(year => 
+              <ListGroupItem 
+                key={year} 
+                onClick={onClick}>
+                {year}
+              </ListGroupItem>
+            )}
+          </ListGroup>
+        ) : (null)}
       </FormGroup>
     )
   }
@@ -71,6 +85,7 @@ class YearPicker extends Component {
 const mapStateToProps = (state) => {
   return {
     common: state.content.common,
+    warningMsgs: state.content.warningMsgs
   }
 }
 

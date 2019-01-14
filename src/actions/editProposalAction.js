@@ -1,9 +1,12 @@
 import * as types from './constant-types'
+import getSumOfAction from './getSumOfAction'
+import { handleResponse, handleError } from '../helpers/fetchHandlers' 
 
 const editProposalAction = (data, cb) => {
     return dispatch => {
+        dispatch(editProposalStartFetching)
         const access_token = localStorage.getItem('access_token');
-        fetch('/proposalStatement', {
+        fetch('/auth/proposalStatement', {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
@@ -11,48 +14,34 @@ const editProposalAction = (data, cb) => {
                 'Authorization': `Bearer ${access_token}`
             }, 
             body: JSON.stringify(data)})
-            .then((res) => {
-                return res.json();
-            })
+            .then(handleResponse)
             .then((data) => {
-                if(data.ok) {
-                    cb()
-                    return dispatch(editProposalSuccess());
-                }
-                throw new Error(data.errors || 'Something wrong')
+                dispatch(editProposalSuccess(data));
+                cb();
+                setTimeout(() => {
+                    dispatch(getSumOfAction())
+                }, 2000);
             })
-            .catch(err => {
-                console.error(err);
-                dispatch(editProposalFail(err));
+            .catch(res => {
+                dispatch(editProposalFail);
+                handleError(res, dispatch)
             })
     }
 }
 
-const startEditProposalAction = () => {
-    return dispatch => {
-        dispatch(editProposalStartFetching())
-    }
+const editProposalStartFetching = {
+    type: types.EDIT_PROPOSAL_START_FETCHING
 }
 
-
-const editProposalStartFetching = () => {
-    return {
-        type: types.EDIT_PROPOSAL_START_FETCHING,
-    }
-}
-
-const editProposalSuccess = data => {
+const editProposalSuccess = (proposal) => {
     return {
         type: types.EDIT_PROPOSAL_SUCCESS,
-        payload: data
+        payload: proposal
     }
 }
 
-const editProposalFail = err => {
-    return {
-        type: types.EDIT_PROPOSAL_FAIL,
-        payload: err
-    }
+const editProposalFail = {
+    type: types.EDIT_PROPOSAL_FAIL
 }
 
-export { startEditProposalAction, editProposalAction };
+export default editProposalAction;
